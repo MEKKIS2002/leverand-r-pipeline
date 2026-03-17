@@ -1,384 +1,373 @@
 <!DOCTYPE html>
-<html lang="no">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Leverandør E-post Pipeline</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;0,9..144,600;1,9..144,200&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vendor Email Pipeline — NOVOOI</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;0,9..144,500;1,9..144,200;1,9..144,300&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:#f0ece0; --sidebar:#e8e4d8; --panel:#f5f2e8; --surface:#faf8f2;
-      --border:#ccc7b8; --border2:#d8d4c8; --accent:#2d2d2a; --accent2:#4a4a44;
-      --accent-bg:rgba(45,45,42,.05); --dim:#b0ab9c; --muted:#6e6a5c; --text:#1a1916;
-      --red:#8b2020; --amber:#6b4010; --green:#2a5020;
-      --mono:'DM Mono',monospace; --serif:'Fraunces',serif;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+    :root{
+      --bg:        #F4EFE6;
+      --sidebar:   #EDE7DC;
+      --panel:     #F9F5EE;
+      --surface:   #FFFFFF;
+      --border:    #D6CFBF;
+      --border2:   #E3DCCE;
+      --accent:    #8A6840;
+      --accent-lt: #C4A07A;
+      --accent-bg: rgba(138,104,64,.07);
+      --dim:       #A89E8E;
+      --muted:     #6E6558;
+      --text:      #1C1915;
+      --red:       #B84040;
+      --amber:     #B87830;
+      --green:     #3A7A50;
+      --green-lt:  rgba(58,122,80,.1);
+      --red-lt:    rgba(184,64,64,.1);
+      --amber-lt:  rgba(184,120,48,.1);
+      --mono:      'DM Mono',monospace;
+      --serif:     'Fraunces',serif;
     }
-    html,body { height:100%; background:var(--bg); color:var(--text); font-family:var(--mono); font-size:12px; overflow:hidden; }
-    .app { display:grid; grid-template-columns:260px 1fr; grid-template-rows:48px 1fr; height:100vh; }
 
-    /* TOP BAR */
-    .topbar { grid-column:1/-1; background:var(--sidebar); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:12px; }
-    .topbar-logo { width:24px; height:24px; background:var(--accent); border-radius:4px; display:grid; place-items:center; flex-shrink:0; }
-    .topbar-logo svg { width:13px; height:13px; }
-    .topbar-title { font-family:var(--serif); font-size:13px; font-weight:400; color:var(--text); }
-    .topbar-sub { font-size:10px; color:var(--dim); letter-spacing:.4px; }
-    .topbar-right { margin-left:auto; display:flex; align-items:center; gap:16px; }
-    .topbar-badge { font-size:10px; color:var(--dim); letter-spacing:.5px; }
-    .dot { width:6px; height:6px; border-radius:50%; background:var(--accent); display:inline-block; margin-right:5px; }
-    .dot.off { background:var(--dim); }
-    .dot.on { background:var(--green); }
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12px;overflow:hidden;}
+    .app{display:grid;grid-template-columns:272px 1fr;grid-template-rows:52px 1fr;height:100vh;}
 
-    /* SIDEBAR */
-    .sidebar { background:var(--sidebar); border-right:1px solid var(--border); overflow-y:auto; display:flex; flex-direction:column; }
-    .ss { padding:18px 16px 0; }
-    .ss+.ss { border-top:1px solid var(--border2); margin-top:14px; padding-top:18px; }
-    .sec-label { font-size:9px; letter-spacing:1.8px; text-transform:uppercase; color:var(--dim); margin-bottom:9px; }
+    /* ── TOPBAR ── */
+    .topbar{grid-column:1/-1;background:var(--sidebar);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:14px;}
+    .t-logo{width:26px;height:26px;background:var(--text);border-radius:4px;display:grid;place-items:center;flex-shrink:0;}
+    .t-logo svg{width:14px;height:14px;}
+    .t-title{font-family:var(--serif);font-size:13px;font-weight:300;letter-spacing:.3px;color:var(--text);}
+    .t-sep{color:var(--dim);font-size:11px;}
+    .t-sub{font-size:10px;color:var(--dim);letter-spacing:.3px;}
+    .t-right{margin-left:auto;display:flex;align-items:center;gap:6px;}
+    .t-status{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--dim);letter-spacing:.3px;}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+    .dot.off{background:var(--dim);}
 
-    /* Upload */
-    .upload-area { border:1px dashed var(--border); border-radius:7px; padding:18px 12px; text-align:center; cursor:pointer; transition:border-color .2s,background .2s; position:relative; background:var(--panel); }
-    .upload-area:hover,.upload-area.drag { border-color:var(--accent); background:var(--accent-bg); }
-    .upload-area input { position:absolute; inset:0; opacity:0; cursor:pointer; }
-    .upload-icon { width:30px; height:30px; background:var(--surface); border:1px solid var(--border); border-radius:5px; display:grid; place-items:center; margin:0 auto 9px; }
-    .upload-area p { color:var(--muted); font-size:11px; line-height:1.6; }
-    .upload-area strong { color:var(--text); }
-    .upload-types { margin-top:7px; display:flex; gap:4px; justify-content:center; }
-    .chip { background:var(--surface); border:1px solid var(--border); border-radius:3px; padding:1px 5px; font-size:9px; color:var(--dim); letter-spacing:.4px; }
-    .upload-area.loaded { border-style:solid; border-color:var(--accent); background:var(--accent-bg); }
-    .upload-area.loaded p { color:var(--accent); }
+    /* ── SIDEBAR ── */
+    .sidebar{background:var(--sidebar);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;padding-bottom:16px;}
+    .ss{padding:18px 16px 0;}
+    .ss+.ss{border-top:1px solid var(--border2);margin-top:14px;padding-top:18px;}
+    .slbl{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--dim);margin-bottom:10px;}
 
-    /* Fields */
-    .field { margin-bottom:9px; }
-    .field label { display:block; font-size:9px; letter-spacing:1.2px; text-transform:uppercase; color:var(--dim); margin-bottom:4px; }
-    .field input { width:100%; background:var(--panel); border:1px solid var(--border); border-radius:5px; color:var(--text); font-family:var(--mono); font-size:11px; padding:6px 8px; outline:none; transition:border-color .2s; }
-    .field input:focus { border-color:var(--accent); }
-    .field input::placeholder { color:var(--dim); }
-    .field-hint { font-size:9px; color:var(--dim); margin-top:3px; line-height:1.5; }
+    /* upload */
+    .upload-area{border:1.5px dashed var(--border);border-radius:8px;padding:18px 12px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;background:rgba(255,255,255,.4);}
+    .upload-area:hover,.upload-area.drag{border-color:var(--accent);background:var(--accent-bg);}
+    .upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+    .u-icon{width:30px;height:30px;background:var(--panel);border:1px solid var(--border);border-radius:5px;display:grid;place-items:center;margin:0 auto 9px;}
+    .upload-area p{color:var(--muted);font-size:11px;line-height:1.6;}
+    .upload-area strong{color:var(--text);}
+    .utypes{margin-top:7px;display:flex;gap:4px;justify-content:center;}
+    .chip{background:var(--panel);border:1px solid var(--border);border-radius:3px;padding:1px 6px;font-size:9px;color:var(--dim);letter-spacing:.3px;}
+    .upload-area.loaded{border-style:solid;border-color:var(--accent-lt);background:var(--accent-bg);}
+    .upload-area.loaded p{color:var(--accent);}
 
-    /* Commands */
-    .cmd-list { list-style:none; }
-    .cmd-list li { display:flex; align-items:center; gap:10px; padding:6px 8px; border-radius:4px; cursor:pointer; transition:background .1s; }
-    .cmd-list li:hover { background:var(--panel); }
-    .cmd-key { font-size:10px; color:var(--accent); min-width:72px; }
-    .cmd-desc { font-size:10px; color:var(--muted); }
+    /* fields */
+    .field{margin-bottom:9px;}
+    .field label{display:block;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--dim);margin-bottom:4px;}
+    .field input{width:100%;background:var(--panel);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:11px;padding:7px 9px;outline:none;transition:border-color .2s;}
+    .field input:focus{border-color:var(--accent);}
+    .field input::placeholder{color:var(--dim);}
 
-    /* Stats */
-    .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
-    .stat-tile { background:var(--panel); border:1px solid var(--border); border-radius:5px; padding:9px; }
-    .stat-tile .n { font-family:var(--serif); font-size:20px; font-weight:400; line-height:1; color:var(--text); }
-    .stat-tile.ca .n { color:var(--accent); }
-    .stat-tile.cb .n { color:var(--amber); }
-    .stat-tile.cc .n { color:var(--red); }
-    .stat-tile .l { font-size:9px; letter-spacing:.7px; text-transform:uppercase; color:var(--dim); margin-top:3px; }
+    /* cmds */
+    .cmd-list{list-style:none;}
+    .cmd-list li{display:flex;align-items:center;gap:10px;padding:5px 7px;border-radius:4px;cursor:pointer;transition:background .1s;}
+    .cmd-list li:hover{background:rgba(255,255,255,.5);}
+    .cmd-key{font-size:10px;color:var(--accent);min-width:72px;font-weight:500;}
+    .cmd-desc{font-size:10px;color:var(--muted);}
 
-    .sidebar-footer { margin-top:auto; padding:14px 16px; border-top:1px solid var(--border2); font-size:9px; color:var(--dim); letter-spacing:.4px; line-height:1.7; }
+    /* stats */
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+    .stat-tile{background:rgba(255,255,255,.55);border:1px solid var(--border);border-radius:6px;padding:9px 10px;}
+    .stat-tile .n{font-family:var(--serif);font-size:22px;font-weight:300;line-height:1;color:var(--text);}
+    .stat-tile.ca .n{color:var(--accent);}
+    .stat-tile.cb .n{color:var(--amber);}
+    .stat-tile.cc .n{color:var(--red);}
+    .stat-tile .l{font-size:9px;letter-spacing:.7px;text-transform:uppercase;color:var(--dim);margin-top:3px;}
 
-    /* MAIN */
-    .main { overflow-y:auto; display:flex; flex-direction:column; }
+    .s-footer{margin-top:auto;padding:14px 16px 0;border-top:1px solid var(--border2);font-size:9px;color:var(--dim);line-height:1.8;}
+    .s-footer strong{color:var(--muted);}
 
-    /* Hero */
-    .hero { padding:40px 48px 28px; border-bottom:1px solid var(--border); }
-    .hero-eyebrow { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--dim); margin-bottom:12px; }
-    .hero h1 { font-family:var(--serif); font-size:32px; font-weight:200; line-height:1.18; color:var(--text); max-width:500px; }
-    .hero h1 em { font-style:italic; color:var(--muted); }
-    .hero-sub { margin-top:12px; font-size:12px; color:var(--muted); line-height:1.7; max-width:460px; }
+    /* ── MAIN ── */
+    .main{overflow-y:auto;display:flex;flex-direction:column;background:var(--bg);}
 
-    /* Steps */
-    .steps-row { display:flex; border-bottom:1px solid var(--border); }
-    .step { flex:1; padding:20px 24px; border-right:1px solid var(--border); }
-    .step:last-child { border-right:none; }
-    .step-num { font-family:var(--serif); font-size:26px; font-weight:200; color:var(--border); line-height:1; margin-bottom:8px; }
-    .step h3 { font-size:11px; color:var(--text); margin-bottom:4px; font-weight:500; }
-    .step p { font-size:10px; color:var(--muted); line-height:1.6; }
+    .hero{padding:40px 48px 28px;border-bottom:1px solid var(--border);}
+    .hero-eye{font-size:9px;letter-spacing:2.2px;text-transform:uppercase;color:var(--dim);margin-bottom:12px;}
+    .hero h1{font-family:var(--serif);font-size:32px;font-weight:200;line-height:1.2;max-width:500px;color:var(--text);}
+    .hero h1 em{font-style:italic;color:var(--dim);}
+    .hero-sub{margin-top:12px;font-size:12px;color:var(--muted);line-height:1.75;max-width:460px;}
+    .hero-sub strong{color:var(--text);}
 
-    /* Results */
-    .results-section { flex:1; display:flex; flex-direction:column; }
-    .results-toolbar { padding:12px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
-    .rt-title { font-size:11px; color:var(--text); font-weight:500; }
-    .filter-tabs { display:flex; gap:3px; }
-    .ftab { background:transparent; border:1px solid var(--border); border-radius:3px; color:var(--muted); padding:3px 9px; font-family:var(--mono); font-size:10px; cursor:pointer; transition:all .15s; }
-    .ftab.on { background:var(--accent); border-color:var(--accent); color:#f0ece0; }
-    .row-count { margin-left:auto; font-size:10px; color:var(--dim); }
-    .btn-scan { background:var(--accent); border:none; border-radius:4px; color:#f2efe8; font-family:var(--mono); font-size:10px; font-weight:500; padding:5px 13px; cursor:pointer; letter-spacing:.3px; transition:opacity .15s; }
-    .btn-scan:disabled { opacity:.3; cursor:not-allowed; }
-    .btn-scan:hover:not(:disabled) { opacity:.85; }
+    .steps-row{display:flex;border-bottom:1px solid var(--border);}
+    .step{flex:1;padding:20px 24px;border-right:1px solid var(--border);}
+    .step:last-child{border-right:none;}
+    .step-n{font-family:var(--serif);font-size:26px;font-weight:200;color:var(--border);line-height:1;margin-bottom:8px;}
+    .step h3{font-size:11px;margin-bottom:4px;font-weight:500;color:var(--text);}
+    .step p{font-size:10px;color:var(--muted);line-height:1.65;}
 
-    /* Table */
-    .table-wrap { flex:1; overflow:auto; }
-    table { width:100%; border-collapse:collapse; }
-    thead th { text-align:left; padding:8px 18px; font-size:9px; letter-spacing:1.2px; text-transform:uppercase; color:var(--dim); border-bottom:1px solid var(--border); white-space:nowrap; position:sticky; top:0; background:var(--panel); }
-    tbody tr { border-bottom:1px solid var(--border2); transition:background .1s; }
-    tbody tr:hover { background:var(--surface); }
-    tbody td { padding:10px 18px; vertical-align:middle; }
-    .td-prod { color:var(--text); font-size:11px; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .td-vend { color:var(--muted); font-size:11px; }
-    .td-mail { color:var(--dim); font-size:10px; }
-    .badge { display:inline-flex; align-items:center; border-radius:3px; padding:2px 6px; font-size:9px; letter-spacing:.4px; font-weight:500; }
-    .bp { background:rgba(60,92,40,.08); color:var(--accent); border:1px solid rgba(60,92,40,.2); }
-    .bl { background:rgba(122,78,16,.08); color:var(--amber); border:1px solid rgba(122,78,16,.2); }
-    .bb { background:rgba(168,48,48,.08); color:var(--red); border:1px solid rgba(168,48,48,.2); }
-    .rs { font-size:10px; color:var(--dim); }
-    .rs.sent { color:var(--green); }
-    .rs.err  { color:var(--red); }
-    .btn-row { background:transparent; border:1px solid var(--border); border-radius:4px; color:var(--muted); font-family:var(--mono); font-size:10px; padding:3px 9px; cursor:pointer; transition:all .15s; white-space:nowrap; }
-    .btn-row:hover { border-color:var(--accent); color:var(--accent); }
-    .btn-row.sent { border-color:#2a4020; color:var(--green); cursor:default; }
-    .btn-row:disabled { opacity:.4; cursor:not-allowed; }
+    /* results */
+    .results-section{flex:1;display:flex;flex-direction:column;}
+    .results-toolbar{padding:11px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--panel);}
+    .rt-title{font-size:11px;font-weight:500;color:var(--text);}
+    .ftabs{display:flex;gap:3px;}
+    .ftab{background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--muted);padding:3px 10px;font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .15s;}
+    .ftab.on{background:var(--text);border-color:var(--text);color:var(--bg);}
+    .row-count{margin-left:auto;font-size:10px;color:var(--dim);}
+    .btn-scan{background:var(--text);border:none;border-radius:4px;color:var(--bg);font-family:var(--mono);font-size:10px;font-weight:500;padding:5px 14px;cursor:pointer;transition:opacity .15s;letter-spacing:.2px;}
+    .btn-scan:disabled{opacity:.25;cursor:not-allowed;}
+    .btn-scan:hover:not(:disabled){opacity:.75;}
 
-    /* Empty */
-    .empty { padding:70px 40px; text-align:center; }
-    .empty-g { font-family:var(--serif); font-size:56px; color:var(--border); margin-bottom:16px; font-weight:200; }
-    .empty p { font-size:12px; color:var(--dim); line-height:1.8; max-width:340px; margin:0 auto; }
-    .empty code { background:var(--surface); border:1px solid var(--border); border-radius:3px; padding:1px 4px; font-size:10px; color:var(--muted); }
+    /* table */
+    .table-wrap{flex:1;overflow:auto;}
+    table{width:100%;border-collapse:collapse;}
+    thead th{text-align:left;padding:8px 18px;font-size:9px;letter-spacing:1.3px;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;background:var(--panel);}
+    tbody tr{border-bottom:1px solid var(--border2);transition:background .1s;}
+    tbody tr:hover{background:rgba(255,255,255,.6);}
+    tbody td{padding:11px 18px;vertical-align:middle;}
+    .td-v{color:var(--text);font-size:11px;font-weight:500;}
+    .td-m{color:var(--dim);font-size:10px;}
+    .td-p{color:var(--muted);font-size:10px;}
 
-    /* Tutorial accordion */
-    details { border-top:1px solid var(--border); }
-    summary { padding:12px 24px; cursor:pointer; font-size:11px; color:var(--muted); list-style:none; display:flex; align-items:center; gap:8px; user-select:none; }
-    summary::-webkit-details-marker { display:none; }
-    summary:hover { color:var(--text); }
-    .tut-grid { padding:18px 24px 24px; border-top:1px solid var(--border2); display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-    .tut-col ol { list-style:none; display:flex; flex-direction:column; gap:9px; }
-    .tut-col li { display:flex; gap:9px; }
-    .tut-n { background:var(--surface); border:1px solid var(--border); border-radius:3px; min-width:19px; height:19px; display:grid; place-items:center; font-size:9px; color:var(--accent); flex-shrink:0; }
-    .tut-n.b { color:var(--amber); }
-    .tut-t { font-size:11px; color:var(--muted); line-height:1.6; }
-    .tut-t strong { color:var(--text); }
-    .tut-t code { background:var(--bg); border:1px solid var(--border); border-radius:2px; padding:1px 4px; font-size:10px; color:var(--muted); }
-    .json-block { grid-column:1/-1; background:var(--surface); border:1px solid var(--border); border-radius:5px; padding:12px 14px; }
-    .json-block pre { font-family:var(--mono); font-size:10px; color:var(--muted); line-height:1.7; }
+    .badge{display:inline-flex;align-items:center;border-radius:3px;padding:2px 7px;font-size:9px;letter-spacing:.3px;font-weight:500;}
+    .bp{background:var(--accent-bg);color:var(--accent);border:1px solid rgba(138,104,64,.2);}
+    .bl{background:var(--amber-lt);color:var(--amber);border:1px solid rgba(184,120,48,.2);}
+    .bb{background:var(--red-lt);color:var(--red);border:1px solid rgba(184,64,64,.2);}
 
-    /* Action bar */
-    .action-bar { border-top:1px solid var(--border); padding:10px 24px; display:flex; align-items:center; gap:12px; background:var(--panel); }
-    .ai { font-size:10px; color:var(--dim); flex:1; }
-    .ai strong { color:var(--text); }
-    .btn-prev { background:transparent; border:1px solid var(--border); border-radius:4px; color:var(--muted); font-family:var(--mono); font-size:11px; padding:7px 16px; cursor:pointer; transition:all .15s; }
-    .btn-prev:hover:not(:disabled) { border-color:var(--muted); color:var(--text); }
-    .btn-prev:disabled { opacity:.3; cursor:not-allowed; }
-    .btn-sa { background:var(--accent); border:none; border-radius:4px; color:#f2efe8; font-family:var(--mono); font-size:11px; font-weight:500; padding:8px 20px; cursor:pointer; transition:opacity .15s; }
-    .btn-sa:disabled { opacity:.3; cursor:not-allowed; }
-    .btn-sa:hover:not(:disabled) { opacity:.85; }
+    .rs{font-size:10px;color:var(--dim);}
+    .rs.sent{color:var(--green);}
+    .rs.err{color:var(--red);}
 
-    /* Modal */
-    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(6px); display:none; place-items:center; z-index:200; }
-    .overlay.open { display:grid; }
-    .modal { background:var(--panel); border:1px solid var(--border); border-radius:10px; width:min(560px,92vw); max-height:80vh; overflow-y:auto; box-shadow:0 32px 100px rgba(0,0,0,.6); }
-    .mh { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-    .mh h3 { font-family:var(--serif); font-size:15px; font-weight:300; }
-    .mx { background:none; border:none; color:var(--dim); font-size:18px; cursor:pointer; line-height:1; }
-    .mx:hover { color:var(--text); }
-    .mb { padding:20px; }
-    .email-meta { background:var(--bg); border:1px solid var(--border); border-radius:5px; padding:11px 13px; margin-bottom:12px; }
-    .er { display:flex; gap:8px; margin-bottom:4px; font-size:11px; }
-    .er:last-child { margin:0; }
-    .ek { color:var(--dim); width:50px; flex-shrink:0; }
-    .ev { color:var(--text); }
-    .email-body { background:var(--bg); border:1px solid var(--border); border-radius:5px; padding:13px; font-size:11px; line-height:1.75; color:var(--text); white-space:pre-wrap; }
-    .mf { padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:7px; justify-content:flex-end; }
-    .btn-cancel { background:transparent; border:1px solid var(--border); border-radius:4px; color:var(--muted); padding:7px 14px; font-family:var(--mono); font-size:11px; cursor:pointer; }
-    .btn-cancel:hover { border-color:var(--muted); color:var(--text); }
-    .btn-confirm { background:var(--accent); border:none; border-radius:4px; color:#0b0c0a; padding:7px 16px; font-family:var(--mono); font-size:11px; font-weight:500; cursor:pointer; }
-    .btn-confirm:disabled { opacity:.4; cursor:not-allowed; }
-    .btn-confirm:hover:not(:disabled) { opacity:.85; }
+    .btn-r{background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-family:var(--mono);font-size:10px;padding:3px 10px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+    .btn-r:hover{border-color:var(--accent);color:var(--accent);}
+    .btn-r.sent{border-color:rgba(58,122,80,.3);color:var(--green);cursor:default;}
+    .btn-r:disabled{opacity:.35;cursor:not-allowed;}
 
-    /* Toast */
-    .toast { position:fixed; bottom:20px; right:20px; background:var(--surface); border:1px solid var(--border); border-radius:5px; padding:9px 14px; font-size:11px; color:var(--text); z-index:300; opacity:0; transform:translateY(5px); transition:opacity .2s,transform .2s; pointer-events:none; }
-    .toast.ok { border-color:rgba(212,240,96,.3); color:var(--accent); }
-    .toast.er { border-color:rgba(240,96,96,.3); color:var(--red); }
-    .toast.vis { opacity:1; transform:translateY(0); }
+    /* empty */
+    .empty{padding:70px 40px;text-align:center;}
+    .empty-g{font-family:var(--serif);font-size:56px;color:var(--border);margin-bottom:14px;font-weight:200;}
+    .empty p{font-size:12px;color:var(--dim);line-height:1.85;max-width:340px;margin:0 auto;}
+    .empty code{background:var(--panel);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:10px;color:var(--muted);}
 
-    ::-webkit-scrollbar { width:4px; height:4px; }
-    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    .spin { display:inline-block; width:9px; height:9px; border:1.5px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; margin-right:4px; }
+    /* action bar */
+    .action-bar{border-top:1px solid var(--border);padding:11px 24px;display:flex;align-items:center;gap:12px;background:var(--panel);}
+    .ainfo{font-size:10px;color:var(--muted);flex:1;}
+    .ainfo strong{color:var(--text);}
+    .btn-prev{background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-family:var(--mono);font-size:11px;padding:7px 16px;cursor:pointer;transition:all .15s;}
+    .btn-prev:hover:not(:disabled){border-color:var(--text);color:var(--text);}
+    .btn-prev:disabled{opacity:.3;cursor:not-allowed;}
+    .btn-sa{background:var(--text);border:none;border-radius:4px;color:var(--bg);font-family:var(--mono);font-size:11px;font-weight:500;padding:8px 20px;cursor:pointer;transition:opacity .15s;letter-spacing:.2px;}
+    .btn-sa:disabled{opacity:.25;cursor:not-allowed;}
+    .btn-sa:hover:not(:disabled){opacity:.75;}
+
+    /* modal */
+    .overlay{position:fixed;inset:0;background:rgba(28,25,21,.45);backdrop-filter:blur(4px);display:none;place-items:center;z-index:200;}
+    .overlay.open{display:grid;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:min(580px,92vw);max-height:82vh;overflow-y:auto;box-shadow:0 20px 60px rgba(28,25,21,.2);}
+    .mh{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+    .mh h3{font-family:var(--serif);font-size:16px;font-weight:300;color:var(--text);}
+    .mx{background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;line-height:1;}
+    .mx:hover{color:var(--text);}
+    .mb{padding:22px;}
+    .m-meta{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:14px;}
+    .mr{display:flex;gap:8px;margin-bottom:5px;font-size:11px;}
+    .mr:last-child{margin:0;}
+    .mk{color:var(--dim);width:55px;flex-shrink:0;}
+    .mv{color:var(--text);}
+    .m-prodlist{margin-bottom:14px;}
+    .m-prodlist-title{font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--dim);margin-bottom:7px;}
+    .m-proditem{display:flex;align-items:center;gap:7px;padding:6px 10px;background:var(--panel);border:1px solid var(--border);border-radius:4px;margin-bottom:4px;font-size:11px;color:var(--text);}
+    .m-proditem:last-child{margin-bottom:0;}
+    .prod-badge{font-size:9px;padding:1px 5px;border-radius:2px;font-weight:500;}
+    .m-body{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px;font-size:11px;line-height:1.8;color:var(--text);white-space:pre-wrap;font-family:var(--mono);}
+    .mf{padding:13px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+    .btn-cancel{background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);padding:7px 14px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .15s;}
+    .btn-cancel:hover{border-color:var(--text);color:var(--text);}
+    .btn-confirm{background:var(--text);border:none;border-radius:4px;color:var(--bg);padding:7px 18px;font-family:var(--mono);font-size:11px;font-weight:500;cursor:pointer;transition:opacity .15s;}
+    .btn-confirm:disabled{opacity:.3;cursor:not-allowed;}
+    .btn-confirm:hover:not(:disabled){opacity:.75;}
+
+    /* toast */
+    .toast{position:fixed;bottom:22px;right:22px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 16px;font-size:11px;color:var(--text);z-index:300;opacity:0;transform:translateY(5px);transition:opacity .2s,transform .2s;pointer-events:none;box-shadow:0 4px 20px rgba(28,25,21,.12);}
+    .toast.ok{border-color:rgba(58,122,80,.35);color:var(--green);}
+    .toast.er{border-color:rgba(184,64,64,.35);color:var(--red);}
+    .toast.vis{opacity:1;transform:translateY(0);}
+
+    ::-webkit-scrollbar{width:4px;height:4px;}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .spin{display:inline-block;width:9px;height:9px;border:1.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:4px;}
   </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- TOP BAR -->
+  <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#f2efe8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+    <div class="t-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#F4EFE6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
       </svg>
     </div>
-    <span class="topbar-title">Leverandør E-post Pipeline</span>
-    <span class="topbar-sub">— novooi.com</span>
-    <div class="topbar-right">
-      <span class="topbar-badge" id="whStatus"><span class="dot off"></span>Webhook ikke konfigurert</span>
+    <span class="t-title">Vendor Email Pipeline</span>
+    <span class="t-sep">—</span>
+    <span class="t-sub">novooi.com</span>
+    <div class="t-right">
+      <span class="t-status" id="whStatus"><span class="dot off"></span>Make.com ready</span>
     </div>
   </header>
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
+
     <div class="ss">
-      <div class="sec-label">Last opp fil</div>
+      <div class="slbl">Upload file</div>
       <div class="upload-area" id="ua">
-        <input type="file" id="fi" accept=".csv,.xlsx,.xls" />
-        <div class="upload-icon">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a09c90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <input type="file" id="fi" accept=".csv,.xlsx,.xls"/>
+        <div class="u-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A89E8E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
             <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
           </svg>
         </div>
-        <p id="ulabel"><strong>Dra og slipp</strong> eller klikk</p>
-        <p>Eksporter .numbers → CSV / Excel</p>
-        <div class="upload-types"><span class="chip">CSV</span><span class="chip">XLSX</span></div>
+        <p id="ulabel"><strong>Drag & drop</strong> or click to browse</p>
+        <p>Export .numbers → CSV or Excel first</p>
+        <div class="utypes"><span class="chip">CSV</span><span class="chip">XLSX</span></div>
       </div>
     </div>
 
     <div class="ss">
-      <div class="sec-label">Make.com Webhook</div>
+      <div class="slbl">Settings</div>
       <div class="field">
-        <label>Webhook URL</label>
-        <input type="url" id="whUrl" placeholder="https://hook.eu2.make.com/…" />
-        <div class="field-hint">Lim inn URL fra Make.com.<br>Se tutorial i bunnen av appen.</div>
+        <label>Project name</label>
+        <input type="text" id="proj" placeholder="Gamlebyen Villa" value="Gamlebyen Villa"/>
       </div>
       <div class="field">
-        <label>Ditt navn (avsender)</label>
-        <input type="text" id="sndr" placeholder="Ola Nordmann" />
-      </div>
-      <div class="field">
-        <label>Prosjektnavn</label>
-        <input type="text" id="proj" placeholder="Gamlebyen Villa" />
+        <label>Signature</label>
+        <input type="text" id="sndr" placeholder="NOVOOI" value="NOVOOI"/>
       </div>
     </div>
 
     <div class="ss">
-      <div class="sec-label">Kommandoer</div>
+      <div class="slbl">Commands</div>
       <ul class="cmd-list">
-        <li onclick="doScan()"><span class="cmd-key">/scan</span><span class="cmd-desc">Skann fil</span></li>
-        <li onclick="fset('pris')"><span class="cmd-key">/pris</span><span class="cmd-desc">Vis prisforespørsler</span></li>
-        <li onclick="fset('levering')"><span class="cmd-key">/levering</span><span class="cmd-desc">Vis leveringstid</span></li>
-        <li onclick="fset('begge')"><span class="cmd-key">/begge</span><span class="cmd-desc">Vis begge</span></li>
-        <li onclick="fset('alle')"><span class="cmd-key">/alle</span><span class="cmd-desc">Vis alle</span></li>
-        <li onclick="sendAll()"><span class="cmd-key">/send-alle</span><span class="cmd-desc">Send alle e-poster</span></li>
+        <li onclick="doScan()"><span class="cmd-key">/scan</span><span class="cmd-desc">Scan & group file</span></li>
+        <li onclick="fset('alle')"><span class="cmd-key">/all</span><span class="cmd-desc">Show all</span></li>
+        <li onclick="fset('pris')"><span class="cmd-key">/quote</span><span class="cmd-desc">Show price requests</span></li>
+        <li onclick="fset('levering')"><span class="cmd-key">/delivery</span><span class="cmd-desc">Show delivery requests</span></li>
+        <li onclick="fset('begge')"><span class="cmd-key">/both</span><span class="cmd-desc">Show both</span></li>
+        <li onclick="sendAll()"><span class="cmd-key">/send-all</span><span class="cmd-desc">Send all pending</span></li>
       </ul>
     </div>
 
     <div class="ss">
-      <div class="sec-label">Statistikk</div>
+      <div class="slbl">Overview</div>
       <div class="stat-grid">
-        <div class="stat-tile"><div class="n" id="s0">—</div><div class="l">Totalt</div></div>
-        <div class="stat-tile ca"><div class="n" id="s1">—</div><div class="l">Pris</div></div>
-        <div class="stat-tile cb"><div class="n" id="s2">—</div><div class="l">Levering</div></div>
-        <div class="stat-tile cc"><div class="n" id="s3">—</div><div class="l">Begge</div></div>
+        <div class="stat-tile"><div class="n" id="s0">—</div><div class="l">Vendors</div></div>
+        <div class="stat-tile ca"><div class="n" id="s1">—</div><div class="l">Quote</div></div>
+        <div class="stat-tile cb"><div class="n" id="s2">—</div><div class="l">Delivery</div></div>
+        <div class="stat-tile cc"><div class="n" id="s3">—</div><div class="l">Both</div></div>
       </div>
     </div>
 
-    <div class="sidebar-footer">
-      Leverandør → kolonne <strong style="color:var(--accent)">Brand</strong><br>
-      Produkt → kolonne <strong style="color:var(--accent)">Product name</strong><br>
-      Trigger: verdi <strong style="color:var(--muted)">1</strong> i pris/levering-kolonne
+    <div class="ss s-footer">
+      Reads columns <strong>Brand</strong> &amp; <strong>Product name</strong><br>
+      Trigger value: <strong>1</strong> in price/delivery columns
     </div>
+
   </aside>
 
   <!-- MAIN -->
   <main class="main">
+
     <div class="hero" id="hero">
-      <div class="hero-eyebrow">Automatiser leverandørkommunikasjon</div>
-      <h1>Send forespørsler om pris og <em>leveringstid</em> automatisk</h1>
-      <p class="hero-sub">Last opp ordre-filen (CSV/Excel eksportert fra Numbers). Appen finner automatisk hvilke leverandører du har spørsmål til og sender e-poster via Make.com. Kolonnene <strong>Brand</strong> og <strong>Product name</strong> leses automatisk.</p>
+      <div class="hero-eye">Vendor communication — NOVOOI</div>
+      <h1>Send price &amp; delivery<br><em>enquiries automatically</em></h1>
+      <p class="hero-sub">Upload your order file (CSV or Excel exported from Numbers). The app groups products by vendor, builds tailored emails, and sends them via <strong>Make.com</strong> — updating <strong>Notion</strong> with every dispatch.</p>
     </div>
 
     <div class="steps-row" id="steps">
-      <div class="step"><div class="step-num">1</div><h3>Eksporter fra Numbers</h3><p>File → Export To → CSV. Last opp filen i sidepanelet til venstre.</p></div>
-      <div class="step"><div class="step-num">2</div><h3>Konfigurer webhook</h3><p>Lim inn Make.com webhook-URL i sidepanelet. Se tutorial nedenfor.</p></div>
-      <div class="step"><div class="step-num">3</div><h3>Skann og forhåndsvis</h3><p>Klikk Skann, forhåndsvis e-postene og godkjenn per rad.</p></div>
-      <div class="step"><div class="step-num">4</div><h3>Make.com sender</h3><p>Webhook trigges og Gmail/SMTP sender riktig e-post til leverandøren.</p></div>
+      <div class="step">
+        <div class="step-n">1</div>
+        <h3>Export from Numbers</h3>
+        <p>File → Export To → CSV. Upload the file using the panel on the left.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <h3>Scan &amp; group</h3>
+        <p>Click Scan. Products are grouped by Brand — one email per vendor.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <h3>Preview &amp; send</h3>
+        <p>Review each email, then send individually or all at once.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">4</div>
+        <h3>Notion updated</h3>
+        <p>Make.com sends the email and logs the order to your Notion database.</p>
+      </div>
     </div>
 
     <div class="results-section">
       <div class="results-toolbar">
-        <span class="rt-title">Leverandøroversikt</span>
-        <div class="filter-tabs">
-          <button class="ftab on" data-f="alle" onclick="fset('alle')">Alle</button>
-          <button class="ftab" data-f="pris" onclick="fset('pris')">Pris</button>
-          <button class="ftab" data-f="levering" onclick="fset('levering')">Levering</button>
-          <button class="ftab" data-f="begge" onclick="fset('begge')">Begge</button>
+        <span class="rt-title">Vendor overview</span>
+        <div class="ftabs">
+          <button class="ftab on" data-f="alle" onclick="fset('alle')">All</button>
+          <button class="ftab" data-f="pris"    onclick="fset('pris')">Quote</button>
+          <button class="ftab" data-f="levering" onclick="fset('levering')">Delivery</button>
+          <button class="ftab" data-f="begge"   onclick="fset('begge')">Both</button>
         </div>
-        <span class="row-count" id="rc">0 rader</span>
-        <button class="btn-scan" id="scanBtn" onclick="doScan()" disabled>↓ Skann fil</button>
+        <span class="row-count" id="rc">0 vendors</span>
+        <button class="btn-scan" id="scanBtn" onclick="doScan()" disabled>↓ Scan file</button>
       </div>
 
       <div class="table-wrap">
         <table>
           <thead><tr>
-            <th>Produkt <span style="color:var(--dim);font-weight:300">(Product name)</span></th>
-            <th>Leverandør <span style="color:var(--dim);font-weight:300">(Brand)</span></th>
-            <th>E-post</th>
+            <th>Vendor <span style="color:var(--border);font-weight:300">(Brand)</span></th>
+            <th>Email</th>
+            <th>Products</th>
             <th>Type</th>
             <th>Status</th>
-            <th>Handling</th>
+            <th>Action</th>
           </tr></thead>
           <tbody id="tb"></tbody>
         </table>
         <div class="empty" id="es">
           <div class="empty-g">∅</div>
-          <p>Last opp en fil og klikk <code>Skann</code> for å finne leverandører som trenger oppfølging.<br><br>Appen leser kolonnene <code>Brand</code>, <code>Product name</code>, <code>Kontakt e-post</code>, <code>Lurer på pris</code> og <code>Lurer på leveringstid</code> automatisk.</p>
+          <p>Upload a file and click <code>Scan file</code> to find vendors that need follow-up on price or delivery time.</p>
         </div>
       </div>
-
-      <!-- Tutorial -->
-      <details>
-        <summary><span style="color:var(--accent)">▸</span> Make.com Tutorial — Slik setter du opp webhook og Gmail-scenario</summary>
-        <div class="tut-grid">
-          <div class="tut-col">
-            <div class="sec-label" style="margin-bottom:10px;">Del 1 — Opprett webhook i Make.com</div>
-            <ol>
-              <li><span class="tut-n">1</span><span class="tut-t">Logg inn på <strong>make.com</strong> og klikk <strong>+ Create a new scenario</strong></span></li>
-              <li><span class="tut-n">2</span><span class="tut-t">Klikk den store <strong>+</strong>-sirkelen. Søk <strong>Webhooks</strong> → velg <strong>Custom webhook</strong></span></li>
-              <li><span class="tut-n">3</span><span class="tut-t">Klikk <strong>Add</strong> → navngi webhook <em>«Leverandør Pipeline»</em> → <strong>Save</strong></span></li>
-              <li><span class="tut-n">4</span><span class="tut-t"><strong>Kopier URL-en</strong> og lim den inn i «Webhook URL»-feltet i sidepanelet til venstre</span></li>
-              <li><span class="tut-n">5</span><span class="tut-t">Klikk <strong>OK</strong>. Make.com venter nå på en test-request. Send én e-post fra denne appen for å lære Make.com datastrukturen</span></li>
-            </ol>
-          </div>
-          <div class="tut-col">
-            <div class="sec-label" style="margin-bottom:10px;">Del 2 — Koble til Gmail / SMTP</div>
-            <ol>
-              <li><span class="tut-n b">6</span><span class="tut-t">Klikk <strong>+</strong> etter webhook-modulen. Søk <strong>Gmail</strong> → velg <strong>Send an Email</strong></span></li>
-              <li><span class="tut-n b">7</span><span class="tut-t"><strong>To:</strong> klikk feltet og velg <code>{{to}}</code> fra webhook-dataene</span></li>
-              <li><span class="tut-n b">8</span><span class="tut-t"><strong>Subject:</strong> velg <code>{{subject}}</code></span></li>
-              <li><span class="tut-n b">9</span><span class="tut-t"><strong>Content:</strong> velg <code>{{body}}</code> — dette er e-postteksten generert av appen</span></li>
-              <li><span class="tut-n b">10</span><span class="tut-t">Klikk <strong>Save</strong> → <strong>Run once</strong> for å teste → Aktiver scenariot med <strong>toggle ON</strong></span></li>
-            </ol>
-          </div>
-          <div class="json-block">
-            <div class="sec-label" style="margin-bottom:8px;">JSON som sendes til Make.com fra appen</div>
-            <pre>
-{
-  "to":      "leverandor@eksempel.no",
-  "subject": "Forespørsel om pris – Produktnavn",
-  "body":    "Hei,\n\nVi holder på med Gamlebyen Villa...",
-  "vendor":  "BrandNavn",
-  "product": "Produktnavn",
-  "type":    "pris"   <span style="color:var(--dim)">// "pris" | "levering" | "begge"</span>
-}</pre>
-          </div>
-        </div>
-      </details>
-    </div><!-- /results-section -->
+    </div>
 
     <div class="action-bar">
-      <div class="ai" id="ainfo">Last opp en fil og klikk Skann</div>
-      <button class="btn-prev" id="prevBtn" disabled onclick="openModal(0)">Forhåndsvis første</button>
-      <button class="btn-sa" id="saBtn" disabled onclick="sendAll()">Send alle via Make.com →</button>
+      <div class="ainfo" id="ainfo">Upload a file and click Scan</div>
+      <button class="btn-prev" id="prevBtn" disabled onclick="openModal(0)">Preview first</button>
+      <button class="btn-sa"   id="saBtn"  disabled onclick="sendAll()">Send all via Make.com →</button>
     </div>
+
   </main>
 </div>
 
 <!-- Modal -->
 <div class="overlay" id="ov">
   <div class="modal">
-    <div class="mh"><h3 id="mtitle">Forhåndsvis e-post</h3><button class="mx" onclick="closeModal()">×</button></div>
+    <div class="mh">
+      <h3 id="mtitle">Preview email</h3>
+      <button class="mx" onclick="closeModal()">×</button>
+    </div>
     <div class="mb">
-      <div class="email-meta" id="mmeta"></div>
-      <div class="email-body" id="mbody"></div>
+      <div class="m-meta" id="mmeta"></div>
+      <div class="m-prodlist" id="mprodlist"></div>
+      <div class="m-body" id="mbody"></div>
     </div>
     <div class="mf">
-      <button class="btn-cancel" onclick="closeModal()">Avbryt</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
       <button class="btn-confirm" id="mconfirm">Send via Make.com →</button>
     </div>
   </div>
@@ -387,163 +376,298 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* ══════════════════════════════════════════════════════════
+   CONFIGURATION — update these values once
+   ══════════════════════════════════════════════════════════ */
+const WEBHOOK_URL      = 'https://hook.eu2.make.com/YOUR_WEBHOOK_ID_HERE';
+const NOTION_DB_ID     = 'YOUR_NOTION_DATABASE_ID_HERE';
+/* ══════════════════════════════════════════════════════════ */
+
 const COL_PRODUCT  = 'Product name';
 const COL_VENDOR   = 'Brand';
 const COL_EMAIL    = 'Kontakt e-post';
 const COL_PRIS     = 'Lurer på pris';
 const COL_LEVERING = 'Lurer på leveringstid';
+const COL_QTY      = 'Antall';
 
-let rows=[], parsedData=null, activeFilter='alle', modalIdx=null;
-const $=id=>document.getElementById(id);
-const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const isOne=v=>{const s=String(v||'').trim().toLowerCase();return s==='1'||s==='ja'||s==='yes'||s==='true'||s==='x';};
-const whUrl=()=>$('whUrl').value.trim();
-const sndr=()=>$('sndr').value.trim()||'[Ditt navn]';
-const proj=()=>$('proj').value.trim()||'prosjektet';
+let parsedData = null;
+let rows       = [];
+let activeFilter = 'alle';
+let modalIdx   = null;
 
-$('whUrl').addEventListener('input',()=>{
-  const v=$('whUrl').value.trim();
-  const el=$('whStatus');
-  if(v.startsWith('https://hook.')){el.innerHTML='<span class="dot"></span>Webhook konfigurert';el.style.color='var(--accent)';}
-  else{el.innerHTML='<span class="dot off"></span>Webhook ikke konfigurert';el.style.color='';}
-});
+const $ = id => document.getElementById(id);
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const isOne = v => { const s = String(v||'').trim().toLowerCase(); return s==='1'||s==='ja'||s==='yes'||s==='true'||s==='x'; };
+const proj  = () => $('proj').value.trim() || 'Gamlebyen Villa';
+const sndr  = () => $('sndr').value.trim() || 'NOVOOI';
 
-// Upload
-const ua=$('ua'),fi=$('fi');
-fi.addEventListener('change',()=>fi.files[0]&&loadFile(fi.files[0]));
-ua.addEventListener('dragover',e=>{e.preventDefault();ua.classList.add('drag');});
-ua.addEventListener('dragleave',()=>ua.classList.remove('drag'));
-ua.addEventListener('drop',e=>{e.preventDefault();ua.classList.remove('drag');e.dataTransfer.files[0]&&loadFile(e.dataTransfer.files[0]);});
-
-function loadFile(file){
-  ua.classList.add('loaded');
-  $('ulabel').innerHTML=`<strong>${esc(file.name)}</strong>`;
-  const ext=file.name.split('.').pop().toLowerCase();
-  if(ext==='csv'){
-    const r=new FileReader();
-    r.onload=e=>{parsedData=Papa.parse(e.target.result,{header:true,skipEmptyLines:true}).data;};
-    r.readAsText(file,'UTF-8');
+/* ── Webhook status ─────────────────────────────────────── */
+(function initStatus(){
+  const el = $('whStatus');
+  if (WEBHOOK_URL && !WEBHOOK_URL.includes('YOUR_WEBHOOK')) {
+    el.innerHTML = '<span class="dot"></span>Make.com connected';
+    el.style.color = 'var(--green)';
   } else {
-    const r=new FileReader();
-    r.onload=e=>{const wb=XLSX.read(e.target.result,{type:'binary'});parsedData=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});};
+    el.innerHTML = '<span class="dot off"></span>Webhook not configured';
+  }
+})();
+
+/* ── File upload ────────────────────────────────────────── */
+const ua = $('ua'), fi = $('fi');
+fi.addEventListener('change', () => fi.files[0] && loadFile(fi.files[0]));
+ua.addEventListener('dragover',  e => { e.preventDefault(); ua.classList.add('drag'); });
+ua.addEventListener('dragleave', () => ua.classList.remove('drag'));
+ua.addEventListener('drop', e => { e.preventDefault(); ua.classList.remove('drag'); e.dataTransfer.files[0] && loadFile(e.dataTransfer.files[0]); });
+
+function loadFile(file) {
+  ua.classList.add('loaded');
+  $('ulabel').innerHTML = `<strong>${esc(file.name)}</strong>`;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'csv') {
+    const r = new FileReader();
+    r.onload = e => { parsedData = Papa.parse(e.target.result, { header:true, skipEmptyLines:true }).data; };
+    r.readAsText(file, 'UTF-8');
+  } else {
+    const r = new FileReader();
+    r.onload = e => { const wb = XLSX.read(e.target.result, {type:'binary'}); parsedData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:''}); };
     r.readAsBinaryString(file);
   }
-  $('scanBtn').disabled=false;
-  toast('Fil lastet inn — klikk Skann','ok');
+  $('scanBtn').disabled = false;
+  toast('File loaded — click Scan file', 'ok');
 }
 
-function doScan(){
-  if(!parsedData)return toast('Ingen fil lastet.','er');
-  rows=[];
-  parsedData.forEach((row,i)=>{
-    const ap=isOne(row[COL_PRIS]),al=isOne(row[COL_LEVERING]);
-    if(!ap&&!al)return;
-    rows.push({product:row[COL_PRODUCT]||`Rad ${i+2}`,vendor:row[COL_VENDOR]||'Ukjent',email:row[COL_EMAIL]||'',type:ap&&al?'begge':ap?'pris':'levering',status:'pending'});
+/* ── Scan & group by vendor ─────────────────────────────── */
+function doScan() {
+  if (!parsedData) return toast('No file loaded.', 'er');
+
+  const map = {};
+  parsedData.forEach((row, i) => {
+    const ap = isOne(row[COL_PRIS]);
+    const al = isOne(row[COL_LEVERING]);
+    if (!ap && !al) return;
+
+    const vendor  = String(row[COL_VENDOR]  || 'Unknown vendor').trim();
+    const product = String(row[COL_PRODUCT] || `Row ${i+2}`).trim();
+    const email   = String(row[COL_EMAIL]   || '').trim();
+    const qty     = row[COL_QTY] ? String(row[COL_QTY]).trim() : '';
+    const rowType = ap && al ? 'begge' : ap ? 'pris' : 'levering';
+
+    if (!map[vendor]) {
+      map[vendor] = { vendor, email, type: rowType, products: [], status: 'pending' };
+    }
+    // Escalate type: if rows differ → begge
+    const cur = map[vendor].type;
+    if (cur !== rowType && cur !== 'begge') map[vendor].type = 'begge';
+    if (!map[vendor].email && email) map[vendor].email = email;
+
+    const label = qty ? `${product} (${qty})` : product;
+    if (label && !map[vendor].products.find(p => p.label === label)) {
+      map[vendor].products.push({ label, name: product, qty, askPris: ap, askLevering: al });
+    }
   });
-  updateStats();renderTable();updateBar();
-  $('hero').style.display='none';$('steps').style.display='none';
-  toast(`Skannet ${parsedData.length} rader — fant ${rows.length} leverandører`,'ok');
+
+  rows = Object.values(map);
+  updateStats(); renderTable(); updateBar();
+  $('hero').style.display  = 'none';
+  $('steps').style.display = 'none';
+  toast(`Scanned ${parsedData.length} rows → ${rows.length} vendor${rows.length !== 1 ? 's' : ''}`, 'ok');
 }
 
-function updateStats(){
-  $('s0').textContent=rows.length||'0';
-  $('s1').textContent=rows.filter(r=>r.type==='pris').length||'0';
-  $('s2').textContent=rows.filter(r=>r.type==='levering').length||'0';
-  $('s3').textContent=rows.filter(r=>r.type==='begge').length||'0';
+/* ── Stats ──────────────────────────────────────────────── */
+function updateStats() {
+  $('s0').textContent = rows.length || '0';
+  $('s1').textContent = rows.filter(r => r.type === 'pris').length     || '0';
+  $('s2').textContent = rows.filter(r => r.type === 'levering').length || '0';
+  $('s3').textContent = rows.filter(r => r.type === 'begge').length    || '0';
 }
 
-function fset(f){
-  activeFilter=f;
-  document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('on',b.dataset.f===f));
+/* ── Filter ─────────────────────────────────────────────── */
+function fset(f) {
+  activeFilter = f;
+  document.querySelectorAll('.ftab').forEach(b => b.classList.toggle('on', b.dataset.f === f));
   renderTable();
 }
-const filtered=()=>activeFilter==='alle'?rows:rows.filter(r=>r.type===activeFilter);
+const filtered = () => activeFilter === 'alle' ? rows : rows.filter(r => r.type === activeFilter);
 
-function renderTable(){
-  const fr=filtered();
-  $('rc').textContent=`${fr.length} rader`;
-  const es=$('es'),tb=$('tb');
-  if(!fr.length){es.style.display='block';tb.innerHTML='';return;}
-  es.style.display='none';
-  tb.innerHTML=fr.map(r=>{
-    const gi=rows.indexOf(r);
-    const bc=r.type==='pris'?'bp':r.type==='levering'?'bl':'bb';
-    const bt=r.type==='pris'?'💰 Pris':r.type==='levering'?'🚚 Levering':'💰🚚 Begge';
-    const sc=r.status==='sent'?'sent':r.status==='error'?'err':'';
-    const st=r.status==='sent'?'✓ Sendt':r.status==='error'?'✕ Feil':'—';
-    const btxt=r.status==='sending'?`<span class="spin"></span>Sender…`:r.status==='sent'?'✓ Sendt':'Send →';
-    const bcls=r.status==='sent'?'btn-row sent':'btn-row';
-    const bdis=r.status==='sending'||r.status==='sent'?'disabled':'';
+/* ── Build email (English template) ─────────────────────── */
+function buildEmail(r) {
+  const sig = sndr();
+
+  // Subject
+  let action = r.type === 'begge'
+    ? 'Request for Quote and Delivery Time'
+    : r.type === 'pris'
+    ? 'Request for Quote'
+    : 'Request for Delivery Time';
+
+  const suffix = r.products.length === 1
+    ? r.products[0].label
+    : `${r.vendor} (${r.products.length} items)`;
+
+  const subject = `${action} – ${suffix}`;
+
+  // Intro
+  const intro = r.products.length === 1
+    ? `We are considering ordering "${r.products[0].label}".`
+    : `We are considering ordering the following items:\n\n${r.products.map(p => `– "${p.label}"`).join('\n')}`;
+
+  // Ask
+  let ask = '';
+  if (r.type === 'begge') {
+    ask = `Could you please provide us with:\n\n1. A quote, including any possible discount for this order?\n2. The expected delivery time?`;
+  } else if (r.type === 'pris') {
+    ask = `Could you please provide us with a quote, including any possible discount for this order?`;
+  } else {
+    ask = `Could you please confirm the expected delivery time for this order?`;
+  }
+
+  const body =
+`Hi,
+
+${intro}
+
+${ask}
+
+Looking forward to hearing from you.
+
+Kind regards,
+${sig}`;
+
+  return { subject, body };
+}
+
+/* ── Render table ───────────────────────────────────────── */
+function renderTable() {
+  const fr = filtered();
+  $('rc').textContent = `${fr.length} vendor${fr.length !== 1 ? 's' : ''}`;
+  const es = $('es'), tb = $('tb');
+  if (!fr.length) { es.style.display = 'block'; tb.innerHTML = ''; return; }
+  es.style.display = 'none';
+  tb.innerHTML = fr.map(r => {
+    const gi  = rows.indexOf(r);
+    const bc  = r.type === 'pris' ? 'bp' : r.type === 'levering' ? 'bl' : 'bb';
+    const bt  = r.type === 'pris' ? 'Quote' : r.type === 'levering' ? 'Delivery' : 'Quote + Delivery';
+    const sc  = r.status === 'sent' ? 'sent' : r.status === 'error' ? 'err' : '';
+    const st  = r.status === 'sent' ? '✓ Sent' : r.status === 'error' ? '✕ Error' : '—';
+    const stxt = r.status === 'sending' ? `<span class="spin"></span>Sending…` : r.status === 'sent' ? '✓ Sent' : 'Send →';
+    const scls = r.status === 'sent' ? 'btn-r sent' : 'btn-r';
+    const sdis = r.status === 'sending' || r.status === 'sent' ? 'disabled' : '';
     return `<tr>
-      <td class="td-prod" title="${esc(r.product)}">${esc(r.product)}</td>
-      <td class="td-vend">${esc(r.vendor)}</td>
-      <td class="td-mail">${esc(r.email)||'<span style="color:var(--dim)">—</span>'}</td>
+      <td class="td-v">${esc(r.vendor)}</td>
+      <td class="td-m">${esc(r.email) || '<span style="color:var(--border)">—</span>'}</td>
+      <td class="td-p">${r.products.length} item${r.products.length !== 1 ? 's' : ''}</td>
       <td><span class="badge ${bc}">${bt}</span></td>
       <td class="rs ${sc}">${st}</td>
       <td style="display:flex;gap:5px;align-items:center;">
-        <button class="btn-row" onclick="openModal(${gi})">Forhåndsvis</button>
-        <button class="${bcls}" onclick="sendOne(${gi})" ${bdis}>${btxt}</button>
+        <button class="btn-r" onclick="openModal(${gi})">Preview</button>
+        <button class="${scls}" onclick="sendOne(${gi})" ${sdis}>${stxt}</button>
       </td>
     </tr>`;
   }).join('');
 }
 
-function updateBar(){
-  const p=rows.filter(r=>r.status==='pending'),s=rows.filter(r=>r.status==='sent');
-  $('ainfo').innerHTML=rows.length?`<strong>${rows.length}</strong> leverandører · <strong style="color:var(--accent)">${s.length}</strong> sendt · ${p.length} gjenstår`:'Last opp en fil og klikk Skann';
-  $('saBtn').disabled=p.length===0;
-  $('prevBtn').disabled=rows.length===0;
+/* ── Action bar ─────────────────────────────────────────── */
+function updateBar() {
+  const p = rows.filter(r => r.status === 'pending');
+  const s = rows.filter(r => r.status === 'sent');
+  $('ainfo').innerHTML = rows.length
+    ? `<strong>${rows.length}</strong> vendor${rows.length !== 1 ? 's' : ''} &nbsp;·&nbsp; <strong style="color:var(--green)">${s.length}</strong> sent &nbsp;·&nbsp; ${p.length} pending`
+    : 'Upload a file and click Scan';
+  $('saBtn').disabled  = p.length === 0;
+  $('prevBtn').disabled = rows.length === 0;
 }
 
-function buildEmail(r){
-  const p=proj(),n=sndr(),pr=r.product,v=r.vendor;
-  if(r.type==='begge')return{subject:`Forespørsel om pris og leveringstid – ${pr}`,body:`Hei,\n\nVi holder på med ${p} og vurderer å bestille «${pr}» fra ${v}.\n\nKunne dere gi oss:\n1. Et tilbud med eventuell rabatt for denne ordren?\n2. Forventet leveringstid?\n\nSer frem til å høre fra dere.\n\nMed vennlig hilsen,\n${n}`};
-  if(r.type==='pris')return{subject:`Forespørsel om pris – ${pr}`,body:`Hei,\n\nVi holder på med ${p} og vurderer å bestille «${pr}» fra ${v}.\n\nKunne dere gi oss et tilbud med eventuell rabatt for denne bestillingen?\n\nSer frem til å høre fra dere.\n\nMed vennlig hilsen,\n${n}`};
-  return{subject:`Forespørsel om leveringstid – ${pr}`,body:`Hei,\n\nVi holder på med ${p} og vurderer å bestille «${pr}» fra ${v}.\n\nKunne dere bekrefte forventet leveringstid?\n\nSer frem til å høre fra dere.\n\nMed vennlig hilsen,\n${n}`};
+/* ── Send one vendor ────────────────────────────────────── */
+async function sendOne(idx) {
+  const r = rows[idx];
+  if (!r || r.status === 'sent') return;
+  if (!r.email) return toast(`No email address for ${r.vendor} — add it to the CSV`, 'er');
+
+  const email = buildEmail(r);
+  r.status = 'sending';
+  renderTable();
+
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to:             r.email,
+        vendor:         r.vendor,
+        type:           r.type,
+        subject:        email.subject,
+        body:           email.body,
+        products:       r.products.map(p => p.label),
+        projectName:    proj(),
+        sender:         sndr(),
+        notionDatabaseId: NOTION_DB_ID
+      })
+    });
+    r.status = res.ok ? 'sent' : 'error';
+    toast(res.ok
+      ? `✓ Sent to ${r.vendor} (${r.products.length} item${r.products.length !== 1 ? 's' : ''})`
+      : `Error sending to ${r.vendor}`,
+      res.ok ? 'ok' : 'er');
+  } catch (e) {
+    r.status = 'error';
+    toast(`Network error: ${e.message}`, 'er');
+  }
+  renderTable(); updateBar(); updateStats();
 }
 
-async function sendOne(idx){
-  const r=rows[idx];
-  if(!r||r.status==='sent')return;
-  const wh=whUrl();
-  if(!wh)return toast('Legg inn Make.com webhook-URL først','er');
-  if(!r.email)return toast(`Ingen e-post registrert for ${r.vendor}`,'er');
-  const email=buildEmail(r);
-  r.status='sending';renderTable();
-  try{
-    const res=await fetch(wh,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:r.email,subject:email.subject,body:email.body,vendor:r.vendor,product:r.product,type:r.type})});
-    r.status=res.ok?'sent':'error';
-    toast(res.ok?`✓ Sendt til ${r.vendor}`:`Feil ved sending til ${r.vendor}`,res.ok?'ok':'er');
-  }catch(e){r.status='error';toast(`Nettverksfeil: ${e.message}`,'er');}
-  renderTable();updateBar();updateStats();
+/* ── Send all pending ───────────────────────────────────── */
+async function sendAll() {
+  const pending = rows.filter(r => r.status === 'pending');
+  if (!pending.length) return;
+  for (const r of pending) {
+    await sendOne(rows.indexOf(r));
+    await new Promise(res => setTimeout(res, 400));
+  }
 }
 
-async function sendAll(){
-  const pending=rows.filter(r=>r.status==='pending');
-  if(!pending.length)return;
-  if(!whUrl())return toast('Legg inn Make.com webhook-URL først','er');
-  for(const r of pending){await sendOne(rows.indexOf(r));await new Promise(res=>setTimeout(res,350));}
-}
+/* ── Modal ──────────────────────────────────────────────── */
+function openModal(idx) {
+  if (idx < 0 || idx >= rows.length) return;
+  const r     = rows[idx];
+  const email = buildEmail(r);
+  modalIdx    = idx;
 
-function openModal(idx){
-  if(idx<0||idx>=rows.length)return;
-  const r=rows[idx];const email=buildEmail(r);modalIdx=idx;
-  $('mtitle').textContent=`Forhåndsvis · ${r.vendor}`;
-  $('mmeta').innerHTML=`<div class="er"><span class="ek">Til:</span><span class="ev">${esc(r.email||'(ingen e-post)')}</span></div><div class="er"><span class="ek">Emne:</span><span class="ev">${esc(email.subject)}</span></div><div class="er"><span class="ek">Type:</span><span class="ev">${r.type==='begge'?'💰🚚 Pris + Leveringstid':r.type==='pris'?'💰 Pris':'🚚 Leveringstid'}</span></div>`;
-  $('mbody').textContent=email.body;
-  const btn=$('mconfirm');
-  btn.textContent=r.status==='sent'?'✓ Allerede sendt':'Send via Make.com →';
-  btn.disabled=r.status==='sent';
-  btn.onclick=()=>{sendOne(idx);closeModal();};
+  $('mtitle').textContent = `${r.vendor} — ${r.products.length} item${r.products.length !== 1 ? 's' : ''}`;
+  $('mmeta').innerHTML = `
+    <div class="mr"><span class="mk">To:</span><span class="mv">${esc(r.email || '(no email address)')}</span></div>
+    <div class="mr"><span class="mk">Subject:</span><span class="mv">${esc(email.subject)}</span></div>
+    <div class="mr"><span class="mk">Type:</span><span class="mv">${r.type === 'begge' ? 'Quote + Delivery Time' : r.type === 'pris' ? 'Quote' : 'Delivery Time'}</span></div>`;
+
+  $('mprodlist').innerHTML =
+    `<div class="m-prodlist-title">Products included (${r.products.length})</div>` +
+    r.products.map(p =>
+      `<div class="m-proditem">
+        <span style="flex:1">${esc(p.label)}</span>
+        ${p.askPris     ? `<span class="prod-badge bp">Quote</span>`    : ''}
+        ${p.askLevering ? `<span class="prod-badge bl">Delivery</span>` : ''}
+      </div>`
+    ).join('');
+
+  $('mbody').textContent = email.body;
+
+  const btn = $('mconfirm');
+  btn.textContent = r.status === 'sent' ? '✓ Already sent' : 'Send via Make.com →';
+  btn.disabled    = r.status === 'sent';
+  btn.onclick     = () => { sendOne(idx); closeModal(); };
   $('ov').classList.add('open');
 }
-function closeModal(){$('ov').classList.remove('open');modalIdx=null;}
-$('ov').addEventListener('click',e=>{if(e.target===$('ov'))closeModal();});
 
+function closeModal() { $('ov').classList.remove('open'); modalIdx = null; }
+$('ov').addEventListener('click', e => { if (e.target === $('ov')) closeModal(); });
+
+/* ── Toast ──────────────────────────────────────────────── */
 let tt;
-function toast(msg,type=''){
-  const t=$('toast');t.textContent=msg;t.className=`toast ${type} vis`;
-  clearTimeout(tt);tt=setTimeout(()=>t.className='toast',3200);
+function toast(msg, type = '') {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} vis`;
+  clearTimeout(tt);
+  tt = setTimeout(() => t.className = 'toast', 3200);
 }
 </script>
 </body>
