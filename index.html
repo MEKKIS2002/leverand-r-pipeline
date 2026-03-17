@@ -379,7 +379,7 @@
 /* ══════════════════════════════════════════════════════════
    CONFIGURATION — update these values once
    ══════════════════════════════════════════════════════════ */
-const WEBHOOK_URL      = 'https://hook.eu1.make.com/rd3lnfmy3dx67lsapf8ae5e9zlndxqo4';
+const WEBHOOK_URL      = 'https://hook.eu2.make.com/YOUR_WEBHOOK_ID_HERE';
 const NOTION_DB_ID     = 'YOUR_NOTION_DATABASE_ID_HERE';
 /* ══════════════════════════════════════════════════════════ */
 
@@ -597,7 +597,8 @@ async function sendOne(idx) {
         type:           r.type,
         subject:        email.subject,
         body:           email.body,
-        products:       r.products.map(p => p.label),
+        products:       r.products.map(p => p.label).filter(l => l && l.trim()),
+        productsText:   r.products.map(p => p.label).filter(l => l && l.trim()).join(', '),
         projectName:    proj(),
         sender:         sndr(),
         notionDatabaseId: NOTION_DB_ID
