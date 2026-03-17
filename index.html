@@ -9,128 +9,130 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-
     :root{
-      --bg:        #F4EFE6;
-      --sidebar:   #EDE7DC;
-      --panel:     #F9F5EE;
-      --surface:   #FFFFFF;
-      --border:    #D6CFBF;
-      --border2:   #E3DCCE;
-      --accent:    #8A6840;
-      --accent-lt: #C4A07A;
-      --accent-bg: rgba(138,104,64,.07);
-      --dim:       #A89E8E;
-      --muted:     #6E6558;
-      --text:      #1C1915;
-      --red:       #B84040;
-      --amber:     #B87830;
-      --green:     #3A7A50;
-      --green-lt:  rgba(58,122,80,.1);
-      --red-lt:    rgba(184,64,64,.1);
-      --amber-lt:  rgba(184,120,48,.1);
-      --mono:      'DM Mono',monospace;
-      --serif:     'Fraunces',serif;
+      --bg:#F4EFE6;--sidebar:#EDE7DC;--panel:#F9F5EE;--surface:#FFFFFF;
+      --border:#D6CFBF;--border2:#E3DCCE;--accent:#8A6840;--accent-lt:#C4A07A;
+      --accent-bg:rgba(138,104,64,.07);--dim:#A89E8E;--muted:#6E6558;--text:#1C1915;
+      --red:#B84040;--amber:#B87830;--green:#3A7A50;
+      --green-lt:rgba(58,122,80,.1);--red-lt:rgba(184,64,64,.1);--amber-lt:rgba(184,120,48,.1);
+      --mono:'DM Mono',monospace;--serif:'Fraunces',serif;
     }
-
     html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12px;overflow:hidden;}
-    .app{display:grid;grid-template-columns:272px 1fr;grid-template-rows:52px 1fr;height:100vh;}
+    .app{display:grid;grid-template-columns:252px 1fr;grid-template-rows:52px 1fr;height:100vh;}
 
-    /* ── TOPBAR ── */
+    /* TOPBAR */
     .topbar{grid-column:1/-1;background:var(--sidebar);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:14px;}
     .t-logo{width:26px;height:26px;background:var(--text);border-radius:4px;display:grid;place-items:center;flex-shrink:0;}
     .t-logo svg{width:14px;height:14px;}
-    .t-title{font-family:var(--serif);font-size:13px;font-weight:300;letter-spacing:.3px;color:var(--text);}
+    .t-title{font-family:var(--serif);font-size:13px;font-weight:300;letter-spacing:.3px;}
     .t-sep{color:var(--dim);font-size:11px;}
     .t-sub{font-size:10px;color:var(--dim);letter-spacing:.3px;}
-    .t-right{margin-left:auto;display:flex;align-items:center;gap:6px;}
-    .t-status{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--dim);letter-spacing:.3px;}
+    .t-right{margin-left:auto;display:flex;align-items:center;gap:16px;}
+    .t-status{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--dim);}
     .dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
     .dot.off{background:var(--dim);}
+    .t-grand{font-size:11px;color:var(--text);}
+    .t-grand span{color:var(--accent);font-weight:500;}
 
-    /* ── SIDEBAR ── */
-    .sidebar{background:var(--sidebar);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;padding-bottom:16px;}
+    /* SIDEBAR */
+    .sidebar{background:var(--sidebar);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;}
     .ss{padding:18px 16px 0;}
     .ss+.ss{border-top:1px solid var(--border2);margin-top:14px;padding-top:18px;}
     .slbl{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--dim);margin-bottom:10px;}
 
     /* upload */
-    .upload-area{border:1.5px dashed var(--border);border-radius:8px;padding:18px 12px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;background:rgba(255,255,255,.4);}
+    .upload-area{border:1.5px dashed var(--border);border-radius:8px;padding:16px 12px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;background:rgba(255,255,255,.4);}
     .upload-area:hover,.upload-area.drag{border-color:var(--accent);background:var(--accent-bg);}
     .upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;}
-    .u-icon{width:30px;height:30px;background:var(--panel);border:1px solid var(--border);border-radius:5px;display:grid;place-items:center;margin:0 auto 9px;}
+    .u-icon{width:28px;height:28px;background:var(--panel);border:1px solid var(--border);border-radius:5px;display:grid;place-items:center;margin:0 auto 8px;}
     .upload-area p{color:var(--muted);font-size:11px;line-height:1.6;}
     .upload-area strong{color:var(--text);}
-    .utypes{margin-top:7px;display:flex;gap:4px;justify-content:center;}
-    .chip{background:var(--panel);border:1px solid var(--border);border-radius:3px;padding:1px 6px;font-size:9px;color:var(--dim);letter-spacing:.3px;}
+    .utypes{margin-top:6px;display:flex;gap:4px;justify-content:center;}
+    .chip{background:var(--panel);border:1px solid var(--border);border-radius:3px;padding:1px 6px;font-size:9px;color:var(--dim);}
     .upload-area.loaded{border-style:solid;border-color:var(--accent-lt);background:var(--accent-bg);}
     .upload-area.loaded p{color:var(--accent);}
-
-    /* fields */
-    .field{margin-bottom:9px;}
-    .field label{display:block;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--dim);margin-bottom:4px;}
-    .field input{width:100%;background:var(--panel);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:11px;padding:7px 9px;outline:none;transition:border-color .2s;}
-    .field input:focus{border-color:var(--accent);}
-    .field input::placeholder{color:var(--dim);}
-
-    /* cmds */
-    .cmd-list{list-style:none;}
-    .cmd-list li{display:flex;align-items:center;gap:10px;padding:5px 7px;border-radius:4px;cursor:pointer;transition:background .1s;}
-    .cmd-list li:hover{background:rgba(255,255,255,.5);}
-    .cmd-key{font-size:10px;color:var(--accent);min-width:72px;font-weight:500;}
-    .cmd-desc{font-size:10px;color:var(--muted);}
 
     /* stats */
     .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
     .stat-tile{background:rgba(255,255,255,.55);border:1px solid var(--border);border-radius:6px;padding:9px 10px;}
-    .stat-tile .n{font-family:var(--serif);font-size:22px;font-weight:300;line-height:1;color:var(--text);}
+    .stat-tile .n{font-family:var(--serif);font-size:20px;font-weight:300;line-height:1;color:var(--text);}
     .stat-tile.ca .n{color:var(--accent);}
     .stat-tile.cb .n{color:var(--amber);}
     .stat-tile.cc .n{color:var(--red);}
+    .stat-tile.cg .n{color:var(--green);}
     .stat-tile .l{font-size:9px;letter-spacing:.7px;text-transform:uppercase;color:var(--dim);margin-top:3px;}
+    .stat-wide{grid-column:1/-1;background:rgba(255,255,255,.55);border:1px solid var(--border);border-radius:6px;padding:9px 10px;display:flex;align-items:baseline;justify-content:space-between;}
+    .stat-wide .n{font-family:var(--serif);font-size:20px;font-weight:300;color:var(--accent);}
+    .stat-wide .l{font-size:9px;letter-spacing:.7px;text-transform:uppercase;color:var(--dim);}
 
-    .s-footer{margin-top:auto;padding:14px 16px 0;border-top:1px solid var(--border2);font-size:9px;color:var(--dim);line-height:1.8;}
+    /* missing email warning list */
+    .warn-list{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:4px;}
+    .warn-item{background:var(--red-lt);border:1px solid rgba(184,64,64,.2);border-radius:4px;padding:5px 8px;font-size:10px;color:var(--red);display:flex;align-items:center;gap:5px;}
+    .warn-item::before{content:"!";width:14px;height:14px;background:var(--red);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:8px;font-weight:700;flex-shrink:0;}
+
+    .s-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border2);font-size:9px;color:var(--dim);line-height:1.8;}
     .s-footer strong{color:var(--muted);}
 
-    /* ── MAIN ── */
+    /* MAIN */
     .main{overflow-y:auto;display:flex;flex-direction:column;background:var(--bg);}
 
-    .hero{padding:40px 48px 28px;border-bottom:1px solid var(--border);}
-    .hero-eye{font-size:9px;letter-spacing:2.2px;text-transform:uppercase;color:var(--dim);margin-bottom:12px;}
-    .hero h1{font-family:var(--serif);font-size:32px;font-weight:200;line-height:1.2;max-width:500px;color:var(--text);}
+    .hero{padding:36px 44px 24px;border-bottom:1px solid var(--border);}
+    .hero-eye{font-size:9px;letter-spacing:2.2px;text-transform:uppercase;color:var(--dim);margin-bottom:10px;}
+    .hero h1{font-family:var(--serif);font-size:30px;font-weight:200;line-height:1.2;max-width:480px;}
     .hero h1 em{font-style:italic;color:var(--dim);}
-    .hero-sub{margin-top:12px;font-size:12px;color:var(--muted);line-height:1.75;max-width:460px;}
+    .hero-sub{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.75;max-width:440px;}
     .hero-sub strong{color:var(--text);}
 
     .steps-row{display:flex;border-bottom:1px solid var(--border);}
-    .step{flex:1;padding:20px 24px;border-right:1px solid var(--border);}
+    .step{flex:1;padding:18px 20px;border-right:1px solid var(--border);}
     .step:last-child{border-right:none;}
-    .step-n{font-family:var(--serif);font-size:26px;font-weight:200;color:var(--border);line-height:1;margin-bottom:8px;}
-    .step h3{font-size:11px;margin-bottom:4px;font-weight:500;color:var(--text);}
+    .step-n{font-family:var(--serif);font-size:22px;font-weight:200;color:var(--border);line-height:1;margin-bottom:6px;}
+    .step h3{font-size:11px;margin-bottom:3px;font-weight:500;}
     .step p{font-size:10px;color:var(--muted);line-height:1.65;}
 
     /* results */
     .results-section{flex:1;display:flex;flex-direction:column;}
-    .results-toolbar{padding:11px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--panel);}
-    .rt-title{font-size:11px;font-weight:500;color:var(--text);}
+    .results-toolbar{padding:10px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--panel);}
+    .rt-title{font-size:11px;font-weight:500;}
     .ftabs{display:flex;gap:3px;}
     .ftab{background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--muted);padding:3px 10px;font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .15s;}
     .ftab.on{background:var(--text);border-color:var(--text);color:var(--bg);}
     .row-count{margin-left:auto;font-size:10px;color:var(--dim);}
-    .btn-scan{background:var(--text);border:none;border-radius:4px;color:var(--bg);font-family:var(--mono);font-size:10px;font-weight:500;padding:5px 14px;cursor:pointer;transition:opacity .15s;letter-spacing:.2px;}
+    .btn-scan{background:var(--text);border:none;border-radius:4px;color:var(--bg);font-family:var(--mono);font-size:10px;font-weight:500;padding:5px 14px;cursor:pointer;transition:opacity .15s;}
     .btn-scan:disabled{opacity:.25;cursor:not-allowed;}
     .btn-scan:hover:not(:disabled){opacity:.75;}
 
     /* table */
     .table-wrap{flex:1;overflow:auto;}
     table{width:100%;border-collapse:collapse;}
-    thead th{text-align:left;padding:8px 18px;font-size:9px;letter-spacing:1.3px;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;background:var(--panel);}
-    tbody tr{border-bottom:1px solid var(--border2);transition:background .1s;}
+    thead th{text-align:left;padding:8px 16px;font-size:9px;letter-spacing:1.3px;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;background:var(--panel);}
+    thead th.right{text-align:right;}
+    tbody tr{border-bottom:1px solid var(--border2);transition:background .1s;cursor:pointer;}
     tbody tr:hover{background:rgba(255,255,255,.6);}
-    tbody td{padding:11px 18px;vertical-align:middle;}
-    .td-v{color:var(--text);font-size:11px;font-weight:500;}
-    .td-m{color:var(--dim);font-size:10px;}
-    .td-p{color:var(--muted);font-size:10px;}
+    tbody td{padding:0;vertical-align:top;}
+
+    /* expandable row */
+    .row-main{display:flex;align-items:center;padding:10px 16px;gap:0;}
+    .row-expand{background:rgba(255,255,255,.4);border-top:1px solid var(--border2);padding:10px 16px 12px;}
+    .row-hidden{display:none;}
+    .td-v{color:var(--text);font-size:11px;font-weight:500;width:160px;flex-shrink:0;}
+    .td-m{color:var(--dim);font-size:10px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:12px;}
+    .td-p{color:var(--muted);font-size:10px;width:60px;flex-shrink:0;}
+    .td-type{width:120px;flex-shrink:0;}
+    .td-price{color:var(--text);font-size:11px;font-weight:500;width:100px;flex-shrink:0;text-align:right;padding-right:12px;}
+    .td-status{width:70px;flex-shrink:0;}
+    .td-action{display:flex;gap:5px;align-items:center;flex-shrink:0;}
+    .chevron{font-size:9px;color:var(--dim);margin-right:8px;transition:transform .15s;display:inline-block;flex-shrink:0;}
+    .chevron.open{transform:rotate(90deg);}
+
+    /* product list inside row */
+    .prod-rows{display:flex;flex-direction:column;gap:3px;}
+    .prod-row{display:flex;align-items:center;gap:10px;font-size:10px;padding:4px 8px;background:var(--panel);border:1px solid var(--border);border-radius:4px;}
+    .prod-row-name{flex:1;color:var(--text);}
+    .prod-row-price{color:var(--muted);font-size:10px;min-width:80px;text-align:right;}
+    .prod-row-badge{font-size:9px;padding:1px 5px;border-radius:2px;font-weight:500;}
+    .prod-total-row{display:flex;justify-content:flex-end;margin-top:5px;font-size:10px;color:var(--muted);}
+    .prod-total-row strong{color:var(--text);margin-left:6px;}
 
     .badge{display:inline-flex;align-items:center;border-radius:3px;padding:2px 7px;font-size:9px;letter-spacing:.3px;font-weight:500;}
     .bp{background:var(--accent-bg);color:var(--accent);border:1px solid rgba(138,104,64,.2);}
@@ -140,6 +142,7 @@
     .rs{font-size:10px;color:var(--dim);}
     .rs.sent{color:var(--green);}
     .rs.err{color:var(--red);}
+    .no-email{font-size:9px;color:var(--red);background:var(--red-lt);border:1px solid rgba(184,64,64,.2);border-radius:3px;padding:1px 5px;}
 
     .btn-r{background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-family:var(--mono);font-size:10px;padding:3px 10px;cursor:pointer;transition:all .15s;white-space:nowrap;}
     .btn-r:hover{border-color:var(--accent);color:var(--accent);}
@@ -147,44 +150,46 @@
     .btn-r:disabled{opacity:.35;cursor:not-allowed;}
 
     /* empty */
-    .empty{padding:70px 40px;text-align:center;}
-    .empty-g{font-family:var(--serif);font-size:56px;color:var(--border);margin-bottom:14px;font-weight:200;}
-    .empty p{font-size:12px;color:var(--dim);line-height:1.85;max-width:340px;margin:0 auto;}
+    .empty{padding:60px 40px;text-align:center;}
+    .empty-g{font-family:var(--serif);font-size:52px;color:var(--border);margin-bottom:12px;font-weight:200;}
+    .empty p{font-size:12px;color:var(--dim);line-height:1.85;max-width:320px;margin:0 auto;}
     .empty code{background:var(--panel);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:10px;color:var(--muted);}
 
     /* action bar */
-    .action-bar{border-top:1px solid var(--border);padding:11px 24px;display:flex;align-items:center;gap:12px;background:var(--panel);}
-    .ainfo{font-size:10px;color:var(--muted);flex:1;}
+    .action-bar{border-top:1px solid var(--border);padding:10px 22px;display:flex;align-items:center;gap:12px;background:var(--panel);}
+    .ainfo{font-size:10px;color:var(--muted);flex:1;line-height:1.6;}
     .ainfo strong{color:var(--text);}
-    .btn-prev{background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-family:var(--mono);font-size:11px;padding:7px 16px;cursor:pointer;transition:all .15s;}
-    .btn-prev:hover:not(:disabled){border-color:var(--text);color:var(--text);}
-    .btn-prev:disabled{opacity:.3;cursor:not-allowed;}
-    .btn-sa{background:var(--text);border:none;border-radius:4px;color:var(--bg);font-family:var(--mono);font-size:11px;font-weight:500;padding:8px 20px;cursor:pointer;transition:opacity .15s;letter-spacing:.2px;}
+    .ainfo .total-price{font-family:var(--serif);font-size:14px;font-weight:300;color:var(--accent);display:block;margin-top:1px;}
+    .btn-sa{background:var(--text);border:none;border-radius:4px;color:var(--bg);font-family:var(--mono);font-size:11px;font-weight:500;padding:8px 20px;cursor:pointer;transition:opacity .15s;}
     .btn-sa:disabled{opacity:.25;cursor:not-allowed;}
     .btn-sa:hover:not(:disabled){opacity:.75;}
 
     /* modal */
     .overlay{position:fixed;inset:0;background:rgba(28,25,21,.45);backdrop-filter:blur(4px);display:none;place-items:center;z-index:200;}
     .overlay.open{display:grid;}
-    .modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:min(580px,92vw);max-height:82vh;overflow-y:auto;box-shadow:0 20px 60px rgba(28,25,21,.2);}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:min(600px,92vw);max-height:84vh;overflow-y:auto;box-shadow:0 20px 60px rgba(28,25,21,.2);}
     .mh{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-    .mh h3{font-family:var(--serif);font-size:16px;font-weight:300;color:var(--text);}
+    .mh h3{font-family:var(--serif);font-size:16px;font-weight:300;}
     .mx{background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;line-height:1;}
     .mx:hover{color:var(--text);}
     .mb{padding:22px;}
     .m-meta{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:14px;}
     .mr{display:flex;gap:8px;margin-bottom:5px;font-size:11px;}
     .mr:last-child{margin:0;}
-    .mk{color:var(--dim);width:55px;flex-shrink:0;}
+    .mk{color:var(--dim);width:60px;flex-shrink:0;}
     .mv{color:var(--text);}
     .m-prodlist{margin-bottom:14px;}
     .m-prodlist-title{font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--dim);margin-bottom:7px;}
-    .m-proditem{display:flex;align-items:center;gap:7px;padding:6px 10px;background:var(--panel);border:1px solid var(--border);border-radius:4px;margin-bottom:4px;font-size:11px;color:var(--text);}
+    .m-proditem{display:flex;align-items:center;gap:7px;padding:6px 10px;background:var(--panel);border:1px solid var(--border);border-radius:4px;margin-bottom:4px;font-size:11px;}
     .m-proditem:last-child{margin-bottom:0;}
+    .m-proditem-name{flex:1;color:var(--text);}
+    .m-proditem-price{color:var(--muted);font-size:10px;}
     .prod-badge{font-size:9px;padding:1px 5px;border-radius:2px;font-weight:500;}
+    .m-total{display:flex;justify-content:flex-end;padding:8px 10px;font-size:11px;color:var(--muted);border-top:1px solid var(--border2);margin-top:2px;}
+    .m-total strong{color:var(--text);margin-left:6px;}
     .m-body{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px;font-size:11px;line-height:1.8;color:var(--text);white-space:pre-wrap;font-family:var(--mono);}
     .mf{padding:13px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
-    .btn-cancel{background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);padding:7px 14px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .15s;}
+    .btn-cancel{background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);padding:7px 14px;font-family:var(--mono);font-size:11px;cursor:pointer;}
     .btn-cancel:hover{border-color:var(--text);color:var(--text);}
     .btn-confirm{background:var(--text);border:none;border-radius:4px;color:var(--bg);padding:7px 18px;font-family:var(--mono);font-size:11px;font-weight:500;cursor:pointer;transition:opacity .15s;}
     .btn-confirm:disabled{opacity:.3;cursor:not-allowed;}
@@ -217,6 +222,7 @@
     <span class="t-sep">—</span>
     <span class="t-sub">novooi.com</span>
     <div class="t-right">
+      <div class="t-grand">Total ex. VAT: <span id="grandTotal">—</span></div>
       <span class="t-status" id="whStatus"><span class="dot off"></span>Make.com ready</span>
     </div>
   </header>
@@ -241,42 +247,30 @@
     </div>
 
     <div class="ss">
-      <div class="slbl">Settings</div>
-      <div class="field">
-        <label>Project name</label>
-        <input type="text" id="proj" placeholder="Gamlebyen Villa" value="Gamlebyen Villa"/>
-      </div>
-      <div class="field">
-        <label>Signature</label>
-        <input type="text" id="sndr" placeholder="NOVOOI" value="NOVOOI"/>
-      </div>
-    </div>
-
-    <div class="ss">
-      <div class="slbl">Commands</div>
-      <ul class="cmd-list">
-        <li onclick="doScan()"><span class="cmd-key">/scan</span><span class="cmd-desc">Scan & group file</span></li>
-        <li onclick="fset('alle')"><span class="cmd-key">/all</span><span class="cmd-desc">Show all</span></li>
-        <li onclick="fset('pris')"><span class="cmd-key">/quote</span><span class="cmd-desc">Show price requests</span></li>
-        <li onclick="fset('levering')"><span class="cmd-key">/delivery</span><span class="cmd-desc">Show delivery requests</span></li>
-        <li onclick="fset('begge')"><span class="cmd-key">/both</span><span class="cmd-desc">Show both</span></li>
-        <li onclick="sendAll()"><span class="cmd-key">/send-all</span><span class="cmd-desc">Send all pending</span></li>
-      </ul>
-    </div>
-
-    <div class="ss">
       <div class="slbl">Overview</div>
       <div class="stat-grid">
         <div class="stat-tile"><div class="n" id="s0">—</div><div class="l">Vendors</div></div>
+        <div class="stat-tile"><div class="n" id="s4">—</div><div class="l">Products</div></div>
         <div class="stat-tile ca"><div class="n" id="s1">—</div><div class="l">Quote</div></div>
         <div class="stat-tile cb"><div class="n" id="s2">—</div><div class="l">Delivery</div></div>
         <div class="stat-tile cc"><div class="n" id="s3">—</div><div class="l">Both</div></div>
+        <div class="stat-tile cg"><div class="n" id="s5">—</div><div class="l">Sent</div></div>
+        <div class="stat-wide">
+          <div class="l">Total ex. VAT</div>
+          <div class="n" id="s6">—</div>
+        </div>
       </div>
     </div>
 
-    <div class="ss s-footer">
-      Reads columns <strong>Brand</strong> &amp; <strong>Product name</strong><br>
-      Trigger value: <strong>1</strong> in price/delivery columns
+    <div class="ss" id="warnSection" style="display:none;">
+      <div class="slbl">Missing email</div>
+      <ul class="warn-list" id="warnList"></ul>
+    </div>
+
+    <div class="s-footer ss">
+      Columns: <strong>Brand</strong> · <strong>Product name</strong><br>
+      Price: <strong>Price eks mva</strong> or <strong>Inkl. 30% rabatt</strong><br>
+      Trigger: <strong>1</strong> in price / delivery columns
     </div>
 
   </aside>
@@ -287,30 +281,14 @@
     <div class="hero" id="hero">
       <div class="hero-eye">Vendor communication — NOVOOI</div>
       <h1>Send price &amp; delivery<br><em>enquiries automatically</em></h1>
-      <p class="hero-sub">Upload your order file (CSV or Excel exported from Numbers). The app groups products by vendor, builds tailored emails, and sends them via <strong>Make.com</strong> — updating <strong>Notion</strong> with every dispatch.</p>
+      <p class="hero-sub">Upload your order file exported from Numbers. Products are grouped by vendor — one email per brand. Make.com sends the email and logs every dispatch to <strong>Notion</strong>.</p>
     </div>
 
     <div class="steps-row" id="steps">
-      <div class="step">
-        <div class="step-n">1</div>
-        <h3>Export from Numbers</h3>
-        <p>File → Export To → CSV. Upload the file using the panel on the left.</p>
-      </div>
-      <div class="step">
-        <div class="step-n">2</div>
-        <h3>Scan &amp; group</h3>
-        <p>Click Scan. Products are grouped by Brand — one email per vendor.</p>
-      </div>
-      <div class="step">
-        <div class="step-n">3</div>
-        <h3>Preview &amp; send</h3>
-        <p>Review each email, then send individually or all at once.</p>
-      </div>
-      <div class="step">
-        <div class="step-n">4</div>
-        <h3>Notion updated</h3>
-        <p>Make.com sends the email and logs the order to your Notion database.</p>
-      </div>
+      <div class="step"><div class="step-n">1</div><h3>Export from Numbers</h3><p>File → Export To → CSV. Upload using the panel on the left.</p></div>
+      <div class="step"><div class="step-n">2</div><h3>Scan & group</h3><p>Click Scan. Products are grouped by Brand — one email per vendor.</p></div>
+      <div class="step"><div class="step-n">3</div><h3>Preview & send</h3><p>Click a row to expand products and preview. Send individually or all at once.</p></div>
+      <div class="step"><div class="step-n">4</div><h3>Notion updated</h3><p>Make.com dispatches the email and logs the order automatically.</p></div>
     </div>
 
     <div class="results-section">
@@ -318,9 +296,9 @@
         <span class="rt-title">Vendor overview</span>
         <div class="ftabs">
           <button class="ftab on" data-f="alle" onclick="fset('alle')">All</button>
-          <button class="ftab" data-f="pris"    onclick="fset('pris')">Quote</button>
-          <button class="ftab" data-f="levering" onclick="fset('levering')">Delivery</button>
-          <button class="ftab" data-f="begge"   onclick="fset('begge')">Both</button>
+          <button class="ftab" data-f="pris"     onclick="fset('pris')">Quote</button>
+          <button class="ftab" data-f="levering"  onclick="fset('levering')">Delivery</button>
+          <button class="ftab" data-f="begge"    onclick="fset('begge')">Both</button>
         </div>
         <span class="row-count" id="rc">0 vendors</span>
         <button class="btn-scan" id="scanBtn" onclick="doScan()" disabled>↓ Scan file</button>
@@ -329,12 +307,13 @@
       <div class="table-wrap">
         <table>
           <thead><tr>
-            <th>Vendor <span style="color:var(--border);font-weight:300">(Brand)</span></th>
+            <th style="width:160px">Vendor</th>
             <th>Email</th>
-            <th>Products</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Action</th>
+            <th style="width:60px">Items</th>
+            <th style="width:120px">Type</th>
+            <th class="right" style="width:110px">Total ex. VAT</th>
+            <th style="width:70px">Status</th>
+            <th style="width:130px">Action</th>
           </tr></thead>
           <tbody id="tb"></tbody>
         </table>
@@ -347,8 +326,7 @@
 
     <div class="action-bar">
       <div class="ainfo" id="ainfo">Upload a file and click Scan</div>
-      <button class="btn-prev" id="prevBtn" disabled onclick="openModal(0)">Preview first</button>
-      <button class="btn-sa"   id="saBtn"  disabled onclick="sendAll()">Send all via Make.com →</button>
+      <button class="btn-sa" id="saBtn" disabled onclick="sendAll()">Send all via Make.com →</button>
     </div>
 
   </main>
@@ -379,8 +357,9 @@
 /* ══════════════════════════════════════════════════════════
    CONFIGURATION — update these values once
    ══════════════════════════════════════════════════════════ */
-const WEBHOOK_URL      = 'https://hook.eu1.make.com/rd3lnfmy3dx67lsapf8ae5e9zlndxqo4';
-const NOTION_DB_ID     = 'YOUR_NOTION_DATABASE_ID_HERE';
+const WEBHOOK_URL  = 'https://hook.eu2.make.com/https://hook.eu1.make.com/rd3lnfmy3dx67lsapf8ae5e9zlndxqo4';
+const NOTION_DB_ID = 'YOUR_NOTION_DATABASE_ID_HERE';
+const SENDER_NAME  = 'NOVOOI';
 /* ══════════════════════════════════════════════════════════ */
 
 const COL_PRODUCT  = 'Product name';
@@ -389,20 +368,27 @@ const COL_EMAIL    = 'Kontakt e-post';
 const COL_PRIS     = 'Lurer på pris';
 const COL_LEVERING = 'Lurer på leveringstid';
 const COL_QTY      = 'Antall';
+const COL_PRICE_EX = 'Price eks mva';
+const COL_PRICE_DIS= 'Inkl. 30% rabatt';
 
-let parsedData = null;
-let rows       = [];
-let activeFilter = 'alle';
-let modalIdx   = null;
-
+let parsedData = null, rows = [], activeFilter = 'alle', modalIdx = null;
 const $ = id => document.getElementById(id);
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const isOne = v => { const s = String(v||'').trim().toLowerCase(); return s==='1'||s==='ja'||s==='yes'||s==='true'||s==='x'; };
-const proj  = () => $('proj').value.trim() || 'Gamlebyen Villa';
-const sndr  = () => $('sndr').value.trim() || 'NOVOOI';
 
-/* ── Webhook status ─────────────────────────────────────── */
-(function initStatus(){
+function parsePrice(raw) {
+  if (!raw) return null;
+  const s = String(raw).replace(/NOK|kr|,/gi, '').replace(/\s/g,'').replace(/\t/g,'');
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
+function fmtNOK(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return 'NOK ' + Math.round(n).toLocaleString('nb-NO');
+}
+
+/* Webhook status */
+(function(){
   const el = $('whStatus');
   if (WEBHOOK_URL && !WEBHOOK_URL.includes('YOUR_WEBHOOK')) {
     el.innerHTML = '<span class="dot"></span>Make.com connected';
@@ -412,7 +398,7 @@ const sndr  = () => $('sndr').value.trim() || 'NOVOOI';
   }
 })();
 
-/* ── File upload ────────────────────────────────────────── */
+/* File upload */
 const ua = $('ua'), fi = $('fi');
 fi.addEventListener('change', () => fi.files[0] && loadFile(fi.files[0]));
 ua.addEventListener('dragover',  e => { e.preventDefault(); ua.classList.add('drag'); });
@@ -425,245 +411,266 @@ function loadFile(file) {
   const ext = file.name.split('.').pop().toLowerCase();
   if (ext === 'csv') {
     const r = new FileReader();
-    r.onload = e => { parsedData = Papa.parse(e.target.result, { header:true, skipEmptyLines:true }).data; };
+    r.onload = e => { parsedData = Papa.parse(e.target.result, {header:true, skipEmptyLines:true}).data; };
     r.readAsText(file, 'UTF-8');
   } else {
     const r = new FileReader();
-    r.onload = e => { const wb = XLSX.read(e.target.result, {type:'binary'}); parsedData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:''}); };
+    r.onload = e => { const wb = XLSX.read(e.target.result,{type:'binary'}); parsedData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}); };
     r.readAsBinaryString(file);
   }
   $('scanBtn').disabled = false;
   toast('File loaded — click Scan file', 'ok');
 }
 
-/* ── Scan & group by vendor ─────────────────────────────── */
+/* Scan & group */
 function doScan() {
   if (!parsedData) return toast('No file loaded.', 'er');
-
   const map = {};
   parsedData.forEach((row, i) => {
-    const ap = isOne(row[COL_PRIS]);
-    const al = isOne(row[COL_LEVERING]);
+    const ap = isOne(row[COL_PRIS]), al = isOne(row[COL_LEVERING]);
     if (!ap && !al) return;
-
     const vendor  = String(row[COL_VENDOR]  || 'Unknown vendor').trim();
     const product = String(row[COL_PRODUCT] || `Row ${i+2}`).trim();
     const email   = String(row[COL_EMAIL]   || '').trim();
     const qty     = row[COL_QTY] ? String(row[COL_QTY]).trim() : '';
     const rowType = ap && al ? 'begge' : ap ? 'pris' : 'levering';
+    const priceEx  = parsePrice(row[COL_PRICE_EX]);
+    const priceDis = parsePrice(row[COL_PRICE_DIS]);
+    const price    = priceDis !== null ? priceDis : priceEx;
 
-    if (!map[vendor]) {
-      map[vendor] = { vendor, email, type: rowType, products: [], status: 'pending' };
-    }
-    // Escalate type: if rows differ → begge
+    if (!map[vendor]) map[vendor] = { vendor, email, type: rowType, products: [], status: 'pending', open: false };
     const cur = map[vendor].type;
     if (cur !== rowType && cur !== 'begge') map[vendor].type = 'begge';
     if (!map[vendor].email && email) map[vendor].email = email;
 
     const label = qty ? `${product} (${qty})` : product;
-    if (label && !map[vendor].products.find(p => p.label === label)) {
-      map[vendor].products.push({ label, name: product, qty, askPris: ap, askLevering: al });
+    if (!map[vendor].products.find(p => p.label === label)) {
+      map[vendor].products.push({ label, name: product, qty, price, askPris: ap, askLevering: al });
     }
   });
 
   rows = Object.values(map);
   updateStats(); renderTable(); updateBar();
-  $('hero').style.display  = 'none';
+  $('hero').style.display = 'none';
   $('steps').style.display = 'none';
-  toast(`Scanned ${parsedData.length} rows → ${rows.length} vendor${rows.length !== 1 ? 's' : ''}`, 'ok');
+  renderWarnings();
+  toast(`Scanned ${parsedData.length} rows → ${rows.length} vendor${rows.length!==1?'s':''}`, 'ok');
 }
 
-/* ── Stats ──────────────────────────────────────────────── */
+function vendorTotal(r) {
+  const prices = r.products.map(p => p.price).filter(p => p !== null);
+  return prices.length ? prices.reduce((a,b)=>a+b, 0) : null;
+}
+function grandTotal() {
+  let total = 0, hasAny = false;
+  rows.forEach(r => { const t = vendorTotal(r); if (t !== null) { total += t; hasAny = true; } });
+  return hasAny ? total : null;
+}
+
+/* Stats */
 function updateStats() {
   $('s0').textContent = rows.length || '0';
-  $('s1').textContent = rows.filter(r => r.type === 'pris').length     || '0';
-  $('s2').textContent = rows.filter(r => r.type === 'levering').length || '0';
-  $('s3').textContent = rows.filter(r => r.type === 'begge').length    || '0';
+  $('s1').textContent = rows.filter(r=>r.type==='pris').length || '0';
+  $('s2').textContent = rows.filter(r=>r.type==='levering').length || '0';
+  $('s3').textContent = rows.filter(r=>r.type==='begge').length || '0';
+  $('s4').textContent = rows.reduce((a,r)=>a+r.products.length,0) || '0';
+  $('s5').textContent = rows.filter(r=>r.status==='sent').length || '0';
+  const gt = grandTotal();
+  const gtStr = fmtNOK(gt);
+  $('s6').textContent = gtStr;
+  $('grandTotal').textContent = gtStr;
 }
 
-/* ── Filter ─────────────────────────────────────────────── */
+/* Warnings — vendors missing email */
+function renderWarnings() {
+  const missing = rows.filter(r => !r.email);
+  const sec = $('warnSection'), list = $('warnList');
+  if (!missing.length) { sec.style.display='none'; return; }
+  sec.style.display = 'block';
+  list.innerHTML = missing.map(r => `<li class="warn-item">${esc(r.vendor)}</li>`).join('');
+}
+
+/* Filter */
 function fset(f) {
   activeFilter = f;
-  document.querySelectorAll('.ftab').forEach(b => b.classList.toggle('on', b.dataset.f === f));
+  document.querySelectorAll('.ftab').forEach(b => b.classList.toggle('on', b.dataset.f===f));
   renderTable();
 }
-const filtered = () => activeFilter === 'alle' ? rows : rows.filter(r => r.type === activeFilter);
+const filtered = () => activeFilter==='alle' ? rows : rows.filter(r=>r.type===activeFilter);
 
-/* ── Build email (English template) ─────────────────────── */
+/* Build email */
 function buildEmail(r) {
-  const sig = sndr();
-
-  // Subject
-  let action = r.type === 'begge'
-    ? 'Request for Quote and Delivery Time'
-    : r.type === 'pris'
-    ? 'Request for Quote'
-    : 'Request for Delivery Time';
-
+  let action = r.type==='begge' ? 'Request for Quote and Delivery Time'
+    : r.type==='pris' ? 'Request for Quote' : 'Request for Delivery Time';
   const subject = `${action} – ${r.vendor}`;
-
-  // Intro
   const intro = r.products.length === 1
     ? `We are considering ordering "${r.products[0].label}".`
-    : `We are considering ordering the following items:\n\n${r.products.map(p => `– "${p.label}"`).join('\n')}`;
-
-  // Ask
-  let ask = '';
-  if (r.type === 'begge') {
-    ask = `Could you please provide us with:\n\n1. A quote, including any possible discount for this order?\n2. The expected delivery time?`;
-  } else if (r.type === 'pris') {
-    ask = `Could you please provide us with a quote, including any possible discount for this order?`;
-  } else {
-    ask = `Could you please confirm the expected delivery time for this order?`;
-  }
-
-  const body =
-`Hi,
-
-${intro}
-
-${ask}
-
-Looking forward to hearing from you.
-
-Kind regards,
-${sig}`;
-
+    : `We are considering ordering the following items:\n\n${r.products.map(p=>`– "${p.label}"`).join('\n')}`;
+  let ask = r.type==='begge'
+    ? `Could you please provide us with:\n\n1. A quote, including any possible discount for this order?\n2. The expected delivery time?`
+    : r.type==='pris'
+    ? `Could you please provide us with a quote, including any possible discount for this order?`
+    : `Could you please confirm the expected delivery time for this order?`;
+  const body = `Hi,\n\n${intro}\n\n${ask}\n\nLooking forward to hearing from you.\n\nKind regards,\n${SENDER_NAME}`;
   return { subject, body };
 }
 
-/* ── Render table ───────────────────────────────────────── */
+/* Render table */
 function renderTable() {
   const fr = filtered();
-  $('rc').textContent = `${fr.length} vendor${fr.length !== 1 ? 's' : ''}`;
-  const es = $('es'), tb = $('tb');
-  if (!fr.length) { es.style.display = 'block'; tb.innerHTML = ''; return; }
-  es.style.display = 'none';
+  $('rc').textContent = `${fr.length} vendor${fr.length!==1?'s':''}`;
+  const es=$('es'), tb=$('tb');
+  if (!fr.length) { es.style.display='block'; tb.innerHTML=''; return; }
+  es.style.display='none';
   tb.innerHTML = fr.map(r => {
-    const gi  = rows.indexOf(r);
-    const bc  = r.type === 'pris' ? 'bp' : r.type === 'levering' ? 'bl' : 'bb';
-    const bt  = r.type === 'pris' ? 'Quote' : r.type === 'levering' ? 'Delivery' : 'Quote + Delivery';
-    const sc  = r.status === 'sent' ? 'sent' : r.status === 'error' ? 'err' : '';
-    const st  = r.status === 'sent' ? '✓ Sent' : r.status === 'error' ? '✕ Error' : '—';
-    const stxt = r.status === 'sending' ? `<span class="spin"></span>Sending…` : r.status === 'sent' ? '✓ Sent' : 'Send →';
-    const scls = r.status === 'sent' ? 'btn-r sent' : 'btn-r';
-    const sdis = r.status === 'sending' || r.status === 'sent' ? 'disabled' : '';
+    const gi   = rows.indexOf(r);
+    const bc   = r.type==='pris'?'bp':r.type==='levering'?'bl':'bb';
+    const bt   = r.type==='pris'?'Quote':r.type==='levering'?'Delivery':'Quote + Delivery';
+    const sc   = r.status==='sent'?'sent':r.status==='error'?'err':'';
+    const st   = r.status==='sent'?'✓ Sent':r.status==='error'?'✕ Error':'—';
+    const stxt = r.status==='sending'?`<span class="spin"></span>Sending…`:r.status==='sent'?'✓ Sent':'Send →';
+    const scls = r.status==='sent'?'btn-r sent':'btn-r';
+    const sdis = r.status==='sending'||r.status==='sent'?'disabled':'';
+    const vt   = vendorTotal(r);
+    const emailCell = r.email
+      ? `<span class="td-m">${esc(r.email)}</span>`
+      : `<span class="td-m"><span class="no-email">No email</span></span>`;
+    const expandId = `exp-${gi}`;
+    const chevId   = `chev-${gi}`;
+
+    const prodRows = r.products.map(p => `
+      <div class="prod-row">
+        <span class="prod-row-name">${esc(p.label)}</span>
+        ${p.askPris     ? `<span class="prod-row-badge bp">Quote</span>` : ''}
+        ${p.askLevering ? `<span class="prod-row-badge bl">Delivery</span>` : ''}
+        <span class="prod-row-price">${p.price!==null?fmtNOK(p.price):'—'}</span>
+      </div>`).join('');
+
+    const prodTotalRow = vt !== null
+      ? `<div class="prod-total-row">Vendor total: <strong>${fmtNOK(vt)}</strong></div>`
+      : '';
+
     return `<tr>
-      <td class="td-v">${esc(r.vendor)}</td>
-      <td class="td-m">${esc(r.email) || '<span style="color:var(--border)">—</span>'}</td>
-      <td class="td-p">${r.products.length} item${r.products.length !== 1 ? 's' : ''}</td>
-      <td><span class="badge ${bc}">${bt}</span></td>
-      <td class="rs ${sc}">${st}</td>
-      <td style="display:flex;gap:5px;align-items:center;">
-        <button class="btn-r" onclick="openModal(${gi})">Preview</button>
-        <button class="${scls}" onclick="sendOne(${gi})" ${sdis}>${stxt}</button>
+      <td colspan="7" style="padding:0">
+        <div class="row-main" onclick="toggleRow(${gi})">
+          <span class="chevron" id="${chevId}">▶</span>
+          <span class="td-v">${esc(r.vendor)}</span>
+          ${emailCell}
+          <span class="td-p">${r.products.length} item${r.products.length!==1?'s':''}</span>
+          <span class="td-type"><span class="badge ${bc}">${bt}</span></span>
+          <span class="td-price">${fmtNOK(vt)}</span>
+          <span class="td-status rs ${sc}">${st}</span>
+          <span class="td-action" onclick="event.stopPropagation()">
+            <button class="btn-r" onclick="openModal(${gi})">Preview</button>
+            <button class="${scls}" onclick="sendOne(${gi})" ${sdis}>${stxt}</button>
+          </span>
+        </div>
+        <div class="row-expand row-hidden" id="${expandId}">
+          <div class="prod-rows">${prodRows}</div>
+          ${prodTotalRow}
+        </div>
       </td>
     </tr>`;
   }).join('');
 }
 
-/* ── Action bar ─────────────────────────────────────────── */
-function updateBar() {
-  const p = rows.filter(r => r.status === 'pending');
-  const s = rows.filter(r => r.status === 'sent');
-  $('ainfo').innerHTML = rows.length
-    ? `<strong>${rows.length}</strong> vendor${rows.length !== 1 ? 's' : ''} &nbsp;·&nbsp; <strong style="color:var(--green)">${s.length}</strong> sent &nbsp;·&nbsp; ${p.length} pending`
-    : 'Upload a file and click Scan';
-  $('saBtn').disabled  = p.length === 0;
-  $('prevBtn').disabled = rows.length === 0;
+function toggleRow(gi) {
+  const exp  = $(`exp-${gi}`);
+  const chev = $(`chev-${gi}`);
+  if (!exp) return;
+  const isOpen = !exp.classList.contains('row-hidden');
+  exp.classList.toggle('row-hidden', isOpen);
+  chev.classList.toggle('open', !isOpen);
+  rows[gi].open = !isOpen;
 }
 
-/* ── Send one vendor ────────────────────────────────────── */
+/* Action bar */
+function updateBar() {
+  const p = rows.filter(r=>r.status==='pending');
+  const s = rows.filter(r=>r.status==='sent');
+  const gt = grandTotal();
+  if (rows.length) {
+    $('ainfo').innerHTML =
+      `<strong>${rows.length}</strong> vendor${rows.length!==1?'s':''} &nbsp;·&nbsp; `+
+      `<strong style="color:var(--green)">${s.length}</strong> sent &nbsp;·&nbsp; ${p.length} pending`+
+      (gt!==null ? `<span class="total-price">${fmtNOK(gt)} ex. VAT across all vendors</span>` : '');
+  } else {
+    $('ainfo').innerHTML = 'Upload a file and click Scan';
+  }
+  $('saBtn').disabled = p.length===0;
+}
+
+/* Send one */
 async function sendOne(idx) {
   const r = rows[idx];
-  if (!r || r.status === 'sent') return;
+  if (!r || r.status==='sent') return;
   if (!r.email) return toast(`No email address for ${r.vendor} — add it to the CSV`, 'er');
-
   const email = buildEmail(r);
-  r.status = 'sending';
-  renderTable();
-
+  r.status = 'sending'; renderTable();
   try {
     const res = await fetch(WEBHOOK_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
-        to:             r.email,
-        vendor:         r.vendor,
-        type:           r.type,
-        subject:        email.subject,
-        body:           email.body,
-        products:       r.products.map(p => p.label),
-        projectName:    proj(),
-        sender:         sndr(),
+        to: r.email, vendor: r.vendor, type: r.type,
+        subject: email.subject, body: email.body,
+        products: r.products.map(p=>p.label),
+        productsText: r.products.map(p=>p.label).join(', '),
+        totalPrice: vendorTotal(r),
         notionDatabaseId: NOTION_DB_ID
       })
     });
     r.status = res.ok ? 'sent' : 'error';
-    toast(res.ok
-      ? `✓ Sent to ${r.vendor} (${r.products.length} item${r.products.length !== 1 ? 's' : ''})`
-      : `Error sending to ${r.vendor}`,
-      res.ok ? 'ok' : 'er');
-  } catch (e) {
-    r.status = 'error';
-    toast(`Network error: ${e.message}`, 'er');
-  }
+    toast(res.ok ? `✓ Sent to ${r.vendor}` : `Error sending to ${r.vendor}`, res.ok?'ok':'er');
+  } catch(e) { r.status='error'; toast(`Network error: ${e.message}`,'er'); }
   renderTable(); updateBar(); updateStats();
 }
 
-/* ── Send all pending ───────────────────────────────────── */
+/* Send all */
 async function sendAll() {
-  const pending = rows.filter(r => r.status === 'pending');
+  const pending = rows.filter(r=>r.status==='pending');
   if (!pending.length) return;
-  for (const r of pending) {
-    await sendOne(rows.indexOf(r));
-    await new Promise(res => setTimeout(res, 400));
-  }
+  for (const r of pending) { await sendOne(rows.indexOf(r)); await new Promise(res=>setTimeout(res,400)); }
 }
 
-/* ── Modal ──────────────────────────────────────────────── */
+/* Modal */
 function openModal(idx) {
-  if (idx < 0 || idx >= rows.length) return;
-  const r     = rows[idx];
-  const email = buildEmail(r);
-  modalIdx    = idx;
-
-  $('mtitle').textContent = `${r.vendor} — ${r.products.length} item${r.products.length !== 1 ? 's' : ''}`;
+  if (idx<0||idx>=rows.length) return;
+  const r = rows[idx], email = buildEmail(r);
+  modalIdx = idx;
+  $('mtitle').textContent = `${r.vendor} — ${r.products.length} item${r.products.length!==1?'s':''}`;
   $('mmeta').innerHTML = `
-    <div class="mr"><span class="mk">To:</span><span class="mv">${esc(r.email || '(no email address)')}</span></div>
+    <div class="mr"><span class="mk">To:</span><span class="mv">${esc(r.email||'(no email address)')}</span></div>
     <div class="mr"><span class="mk">Subject:</span><span class="mv">${esc(email.subject)}</span></div>
-    <div class="mr"><span class="mk">Type:</span><span class="mv">${r.type === 'begge' ? 'Quote + Delivery Time' : r.type === 'pris' ? 'Quote' : 'Delivery Time'}</span></div>`;
+    <div class="mr"><span class="mk">Type:</span><span class="mv">${r.type==='begge'?'Quote + Delivery Time':r.type==='pris'?'Quote':'Delivery Time'}</span></div>
+    <div class="mr"><span class="mk">Total:</span><span class="mv">${fmtNOK(vendorTotal(r))}</span></div>`;
 
+  const vt = vendorTotal(r);
   $('mprodlist').innerHTML =
     `<div class="m-prodlist-title">Products included (${r.products.length})</div>` +
-    r.products.map(p =>
-      `<div class="m-proditem">
-        <span style="flex:1">${esc(p.label)}</span>
-        ${p.askPris     ? `<span class="prod-badge bp">Quote</span>`    : ''}
-        ${p.askLevering ? `<span class="prod-badge bl">Delivery</span>` : ''}
-      </div>`
-    ).join('');
+    r.products.map(p => `<div class="m-proditem">
+      <span class="m-proditem-name">${esc(p.label)}</span>
+      ${p.askPris     ? `<span class="prod-badge bp">Quote</span>` : ''}
+      ${p.askLevering ? `<span class="prod-badge bl">Delivery</span>` : ''}
+      <span class="m-proditem-price">${p.price!==null?fmtNOK(p.price):'—'}</span>
+    </div>`).join('') +
+    (vt!==null ? `<div class="m-total">Vendor total: <strong>${fmtNOK(vt)} ex. VAT</strong></div>` : '');
 
   $('mbody').textContent = email.body;
-
   const btn = $('mconfirm');
-  btn.textContent = r.status === 'sent' ? '✓ Already sent' : 'Send via Make.com →';
-  btn.disabled    = r.status === 'sent';
-  btn.onclick     = () => { sendOne(idx); closeModal(); };
+  btn.textContent = r.status==='sent' ? '✓ Already sent' : 'Send via Make.com →';
+  btn.disabled = r.status==='sent';
+  btn.onclick = () => { sendOne(idx); closeModal(); };
   $('ov').classList.add('open');
 }
+function closeModal() { $('ov').classList.remove('open'); modalIdx=null; }
+$('ov').addEventListener('click', e => { if(e.target===$('ov')) closeModal(); });
 
-function closeModal() { $('ov').classList.remove('open'); modalIdx = null; }
-$('ov').addEventListener('click', e => { if (e.target === $('ov')) closeModal(); });
-
-/* ── Toast ──────────────────────────────────────────────── */
+/* Toast */
 let tt;
-function toast(msg, type = '') {
-  const t = $('toast');
-  t.textContent = msg;
-  t.className = `toast ${type} vis`;
-  clearTimeout(tt);
-  tt = setTimeout(() => t.className = 'toast', 3200);
+function toast(msg, type='') {
+  const t=$('toast'); t.textContent=msg; t.className=`toast ${type} vis`;
+  clearTimeout(tt); tt=setTimeout(()=>t.className='toast',3200);
 }
 </script>
 </body>
