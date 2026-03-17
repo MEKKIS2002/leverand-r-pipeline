@@ -500,11 +500,7 @@ function buildEmail(r) {
     ? 'Request for Quote'
     : 'Request for Delivery Time';
 
-  const suffix = r.products.length === 1
-    ? r.products[0].label
-    : `${r.vendor} (${r.products.length} items)`;
-
-  const subject = `${action} – ${suffix}`;
+  const subject = `${action} – ${r.vendor}`;
 
   // Intro
   const intro = r.products.length === 1
@@ -597,8 +593,7 @@ async function sendOne(idx) {
         type:           r.type,
         subject:        email.subject,
         body:           email.body,
-        products:       r.products.map(p => p.label).filter(l => l && l.trim()),
-        productsText:   r.products.map(p => p.label).filter(l => l && l.trim()).join(', '),
+        products:       r.products.map(p => p.label),
         projectName:    proj(),
         sender:         sndr(),
         notionDatabaseId: NOTION_DB_ID
