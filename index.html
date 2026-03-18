@@ -19,7 +19,21 @@
       --mono:'DM Mono',monospace;--serif:'Fraunces',serif;
     }
     html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12px;overflow:hidden;}
-    .app{display:grid;grid-template-columns:252px 1fr;grid-template-rows:52px 1fr;height:100vh;}
+    .app{height:100vh;}
+
+    /* PASSWORD GATE */
+    .gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;}
+    .gate-box{background:var(--sidebar);border:1px solid var(--border);border-radius:12px;padding:40px 44px;width:320px;text-align:center;}
+    .gate-logo{width:52px;height:52px;background:#1C1915;border-radius:10px;display:grid;place-items:center;margin:0 auto 20px;}
+    .gate-title{font-family:var(--serif);font-size:20px;font-weight:300;margin-bottom:6px;color:var(--text);}
+    .gate-sub{font-size:11px;color:var(--dim);margin-bottom:24px;line-height:1.6;}
+    .gate-input{width:100%;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 12px;outline:none;text-align:center;letter-spacing:3px;transition:border-color .2s;margin-bottom:12px;}
+    .gate-input:focus{border-color:var(--accent);}
+    .gate-input.err{border-color:var(--red);animation:shake .3s ease;}
+    .gate-btn{width:100%;background:var(--text);border:none;border-radius:6px;color:var(--bg);font-family:var(--mono);font-size:12px;font-weight:500;padding:10px;cursor:pointer;transition:opacity .15s;letter-spacing:.3px;}
+    .gate-btn:hover{opacity:.75;}
+    .gate-err{font-size:10px;color:var(--red);margin-top:2px;min-height:16px;}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
     /* TOPBAR */
     .topbar{grid-column:1/-1;background:var(--sidebar);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:14px;}
@@ -209,7 +223,24 @@
   </style>
 </head>
 <body>
-<div class="app">
+
+<!-- PASSWORD GATE -->
+<div class="gate" id="gate">
+  <div class="gate-box">
+    <div class="gate-logo">
+      <svg viewBox="0 0 52 52" width="52" height="52">
+        <text x="26" y="37" text-anchor="middle" font-size="26" font-family="Georgia,serif" font-style="italic" fill="#C4A07A" letter-spacing="1">NV</text>
+      </svg>
+    </div>
+    <div class="gate-title">Vendor Pipeline</div>
+    <div class="gate-sub">novooi.com — internal tool</div>
+    <input class="gate-input" id="gateInput" type="password" placeholder="••••••••" autocomplete="current-password"/>
+    <button class="gate-btn" onclick="checkPassword()">Enter →</button>
+    <div class="gate-err" id="gateErr"></div>
+  </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none;grid-template-columns:252px 1fr;grid-template-rows:52px 1fr;height:100vh;">
 
   <!-- TOPBAR -->
   <header class="topbar">
@@ -357,7 +388,7 @@
 /* ══════════════════════════════════════════════════════════
    CONFIGURATION — update these values once
    ══════════════════════════════════════════════════════════ */
-const WEBHOOK_URL  = 'https://hook.eu1.make.com/rd3lnfmy3dx67lsapf8ae5e9zlndxqo4';
+const WEBHOOK_URL  = 'https://hook.eu2.make.com/YOUR_WEBHOOK_ID_HERE';
 const NOTION_DB_ID = 'YOUR_NOTION_DATABASE_ID_HERE';
 const SENDER_NAME  = 'NOVOOI';
 /* ══════════════════════════════════════════════════════════ */
@@ -665,6 +696,36 @@ function openModal(idx) {
 }
 function closeModal() { $('ov').classList.remove('open'); modalIdx=null; }
 $('ov').addEventListener('click', e => { if(e.target===$('ov')) closeModal(); });
+
+
+/* PASSWORD GATE */
+(function(){
+  const stored = sessionStorage.getItem('nv_auth');
+  if (stored === 'ok') unlock();
+})();
+
+function checkPassword() {
+  const val = document.getElementById('gateInput').value;
+  if (val === 'Novooi26') {
+    sessionStorage.setItem('nv_auth', 'ok');
+    unlock();
+  } else {
+    const inp = document.getElementById('gateInput');
+    const err = document.getElementById('gateErr');
+    inp.classList.add('err');
+    err.textContent = 'Incorrect password';
+    setTimeout(() => { inp.classList.remove('err'); inp.value=''; }, 800);
+  }
+}
+
+function unlock() {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'grid';
+}
+
+document.getElementById('gateInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPassword();
+});
 
 /* Toast */
 let tt;
