@@ -85,6 +85,8 @@
     .warn-item{background:var(--red-lt);border:1px solid rgba(184,64,64,.2);border-radius:4px;padding:5px 8px;font-size:10px;color:var(--red);display:flex;align-items:center;gap:5px;}
     .warn-item::before{content:"!";width:14px;height:14px;background:var(--red);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:8px;font-weight:700;flex-shrink:0;}
 
+    .btn-template{width:100%;margin-top:8px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:var(--mono);font-size:10px;padding:7px 10px;cursor:pointer;transition:all .15s;text-align:left;letter-spacing:.2px;}
+    .btn-template:hover{border-color:var(--accent);color:var(--accent);}
     .s-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border2);font-size:9px;color:var(--dim);line-height:1.8;}
     .s-footer strong{color:var(--muted);}
 
@@ -275,6 +277,14 @@
         <p>Export .numbers → CSV or Excel first</p>
         <div class="utypes"><span class="chip">CSV</span><span class="chip">XLSX</span></div>
       </div>
+      <button class="btn-template" onclick="downloadTemplate()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;vertical-align:middle;">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download CSV template
+      </button>
     </div>
 
     <div class="ss">
@@ -388,7 +398,7 @@
 /* ══════════════════════════════════════════════════════════
    CONFIGURATION — update these values once
    ══════════════════════════════════════════════════════════ */
-const WEBHOOK_URL  = 'https://hook.eu1.make.com/rd3lnfmy3dx67lsapf8ae5e9zlndxqo4';
+const WEBHOOK_URL  = 'https://hook.eu2.make.com/YOUR_WEBHOOK_ID_HERE';
 const NOTION_DB_ID = 'YOUR_NOTION_DATABASE_ID_HERE';
 const SENDER_NAME  = 'NOVOOI';
 /* ══════════════════════════════════════════════════════════ */
@@ -694,6 +704,42 @@ function openModal(idx) {
   btn.onclick = () => { sendOne(idx); closeModal(); };
   $('ov').classList.add('open');
 }
+function downloadTemplate() {
+  const headers = [
+    'Product name',
+    'Product image (URL)',
+    'Price eks mva',
+    'Inkl. 30% rabatt',
+    'Delivery Time',
+    'Brand',
+    'Lurer på pris',
+    'Lurer på leveringstid',
+    'Kontakt e-post',
+    'Antall'
+  ];
+  const example = [
+    'Stol modell X',
+    '',
+    'NOK 4990',
+    'NOK 3493',
+    '4-6 uker',
+    'Leverandørnavn',
+    '1',
+    '1',
+    'kontakt@leverandor.no',
+    '4'
+  ];
+  const csv = [headers.join(','), example.join(',')].join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'NOVOOI_Vendor_Pipeline_Template.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Template downloaded', 'ok');
+}
+
 function closeModal() { $('ov').classList.remove('open'); modalIdx=null; }
 $('ov').addEventListener('click', e => { if(e.target===$('ov')) closeModal(); });
 
